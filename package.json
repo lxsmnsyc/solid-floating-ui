@@ -1,0 +1,15 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "examples/*",
+    "docs"
+  ],
+  "devDependencies": {
+    "eslint": "^8.18.0",
+    "eslint-config-lxsmnsyc": "^0.4.7",
+    "lerna": "^5.1.4",
+    "typescript": "^4.7.4"
+  }
+}
