@@ -1,6 +1,6 @@
 # solid-floating-ui
 
-> SolidJS bindings for `solid-floating-ui`
+> SolidJS bindings for [Floating UI](https://floating-ui.com/). Based on [`@floating-ui/react-dom`](https://floating-ui.com/docs/react-dom)
 
 [![NPM](https://img.shields.io/npm/v/solid-floating-ui.svg)](https://www.npmjs.com/package/solid-floating-ui) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
 

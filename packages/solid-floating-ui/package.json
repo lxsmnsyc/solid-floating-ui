@@ -39,19 +39,19 @@
     "test": "vitest"
   },
   "private": false,
-  "description": "",
+  "description": "SolidJS bindings for Floating UI",
   "repository": {
-    "url": "",
+    "url": "https://github.com/lxsmnsyc/solid-floating-ui.git",
     "type": "git"
   },
-  "homepage": "",
+  "homepage": "https://github.com/lxsmnsyc/solid-floating-ui/tree/main/packages/solid-floating-ui",
   "bugs": {
-    "url": ""
+    "url": "https://github.com/lxsmnsyc/solid-floating-ui/issues"
   },
-  "author": "",
   "publishConfig": {
     "access": "public"
   },
+  "author": "Alexis Munsayac",
   "exports": {
     ".": {
       "development": {
