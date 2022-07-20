@@ -80,7 +80,7 @@ If the floating element lives in a different `offsetParent` context to the refer
 To do so, use the `autoUpdate` utility:
 
 ```js
-import { useFloating } from '@floating-ui/react-dom';
+import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
  
 function App() {
