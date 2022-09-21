@@ -38,8 +38,8 @@ function App() {
         ref={setFloating}
         style={{
           position: position.strategy,
-          top: position.x ?? 0,
-          left: position.y ?? 0,
+          top: `${position.y ?? 0}px`,
+          left: `${position.x ?? 0}px`,
         }}
       >
         Tooltip
@@ -133,8 +133,8 @@ function App() {
       ref={floating}
       style={{
         position: position.strategy,
-        top: position.y ?? 0,
-        left: position.x ?? 0,
+        top: `${position.y ?? 0}px`,
+        left: `${position.x ?? 0}px`,
       }}
     >
       Tooltip
