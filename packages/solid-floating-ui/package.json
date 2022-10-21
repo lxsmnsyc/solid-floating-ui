@@ -1,5 +1,6 @@
 {
   "name": "solid-floating-ui",
+  "type": "module",
   "version": "0.1.0",
   "files": [
     "dist",
@@ -13,15 +14,14 @@
     "pridepack"
   ],
   "devDependencies": {
-    "@floating-ui/dom": "^1.0.0",
-    "@types/node": "^18.0.0",
-    "eslint": "^8.20.0",
-    "eslint-config-lxsmnsyc": "^0.4.1",
-    "pridepack": "2.1.2",
-    "solid-js": "^1.4.7",
+    "@floating-ui/dom": "^1.0.3",
+    "@types/node": "^18.11.3",
+    "eslint": "^8.25.0",
+    "eslint-config-lxsmnsyc": "^0.4.8",
+    "pridepack": "2.3.0",
+    "solid-js": "^1.6.0",
     "tslib": "^2.4.0",
-    "typescript": "^4.7.4",
-    "vitest": "^0.16.0"
+    "typescript": "^4.8.4"
   },
   "peerDependencies": {
     "@floating-ui/dom": "^1.0",
