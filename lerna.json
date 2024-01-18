@@ -1,20 +1,12 @@
 {
-  "useWorkspaces": true,
-  "packages": [
-    "packages/*",
-    "examples/*",
-    "docs"
-  ],
+  "npmClient": "pnpm",
+  "packages": ["packages/*", "examples/*", "docs"],
   "command": {
     "version": {
       "exact": true
     },
     "publish": {
-      "allowBranch": [
-        "main",
-        "vdom",
-        "no-vdom"
-      ],
+      "allowBranch": ["main"],
       "registry": "https://registry.npmjs.org/"
     }
   },
