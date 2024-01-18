@@ -2,23 +2,26 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  on,
   onCleanup,
 } from 'solid-js';
-import {
-  computePosition,
+import type {
   ComputePositionConfig,
   ComputePositionReturn,
   ReferenceElement,
 } from '@floating-ui/dom';
+import { computePosition } from '@floating-ui/dom';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ignore<T>(_value: T): void {
-  // no-op
-}
-
-export interface UseFloatingOptions<R extends ReferenceElement, F extends HTMLElement>
-  extends Partial<ComputePositionConfig> {
-  whileElementsMounted?: (reference: R, floating: F, update: () => void) => (void | (() => void));
+export interface UseFloatingOptions<
+  R extends ReferenceElement,
+  F extends HTMLElement,
+> extends Partial<ComputePositionConfig> {
+  whileElementsMounted?: (
+    reference: R,
+    floating: F,
+    update: () => void,
+    // biome-ignore lint/suspicious/noConfusingVoidType: void is a valid return type
+  ) => void | (() => void);
 }
 
 interface UseFloatingState extends Omit<ComputePositionReturn, 'x' | 'y'> {
@@ -67,50 +70,49 @@ export function useFloating<R extends ReferenceElement, F extends HTMLElement>(
 
     if (currentReference && currentFloating) {
       const capturedVersion = version();
-      computePosition(
-        currentReference,
-        currentFloating,
-        {
-          middleware: options?.middleware,
-          placement: placement(),
-          strategy: strategy(),
+      computePosition(currentReference, currentFloating, {
+        middleware: options?.middleware,
+        placement: placement(),
+        strategy: strategy(),
+      }).then(
+        currentData => {
+          // Check if it's still valid
+          if (capturedVersion === version()) {
+            setData(currentData);
+          }
         },
-      ).then((currentData) => {
-        // Check if it's still valid
-        if (capturedVersion === version()) {
-          setData(currentData);
-        }
-      }, (err) => {
-        setError(err);
-      });
+        err => {
+          setError(err);
+        },
+      );
     }
   }
 
-  createEffect(() => {
-    const currentReference = reference();
-    const currentFloating = floating();
+  createEffect(
+    on(
+      () => [options?.middleware, placement(), strategy()],
+      () => {
+        const currentReference = reference();
+        const currentFloating = floating();
 
-    // Subscribe to other reactive properties
-    ignore(options?.middleware);
-    placement();
-    strategy();
+        if (currentReference && currentFloating) {
+          if (options?.whileElementsMounted) {
+            const cleanup = options.whileElementsMounted(
+              currentReference,
+              currentFloating,
+              update,
+            );
 
-    if (currentReference && currentFloating) {
-      if (options?.whileElementsMounted) {
-        const cleanup = options.whileElementsMounted(
-          currentReference,
-          currentFloating,
-          update,
-        );
-
-        if (cleanup) {
-          onCleanup(cleanup);
+            if (cleanup) {
+              onCleanup(cleanup);
+            }
+          } else {
+            update();
+          }
         }
-      } else {
-        update();
-      }
-    }
-  });
+      },
+    ),
+  );
 
   return {
     get x() {
