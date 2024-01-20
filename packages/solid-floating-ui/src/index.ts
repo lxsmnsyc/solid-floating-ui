@@ -1,10 +1,4 @@
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  on,
-  onCleanup,
-} from 'solid-js';
+import { createEffect, createMemo, createSignal, onCleanup } from 'solid-js';
 import type {
   ComputePositionConfig,
   ComputePositionReturn,
@@ -88,31 +82,30 @@ export function useFloating<R extends ReferenceElement, F extends HTMLElement>(
     }
   }
 
-  createEffect(
-    on(
-      () => [options?.middleware, placement(), strategy()],
-      () => {
-        const currentReference = reference();
-        const currentFloating = floating();
+  createEffect(() => {
+    const currentReference = reference();
+    const currentFloating = floating();
 
-        if (currentReference && currentFloating) {
-          if (options?.whileElementsMounted) {
-            const cleanup = options.whileElementsMounted(
-              currentReference,
-              currentFloating,
-              update,
-            );
+    options?.middleware;
+    placement();
+    strategy();
 
-            if (cleanup) {
-              onCleanup(cleanup);
-            }
-          } else {
-            update();
-          }
+    if (currentReference && currentFloating) {
+      if (options?.whileElementsMounted) {
+        const cleanup = options.whileElementsMounted(
+          currentReference,
+          currentFloating,
+          update,
+        );
+
+        if (cleanup) {
+          onCleanup(cleanup);
         }
-      },
-    ),
-  );
+      } else {
+        update();
+      }
+    }
+  });
 
   return {
     get x() {
