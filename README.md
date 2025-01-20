@@ -94,7 +94,7 @@ function App() {
     whileElementsMounted: (reference, floating, update) => (
       autoUpdate(reference, floating, update, {
         animationFrame: true,
-      }),
+      })
     )
   });
 }
