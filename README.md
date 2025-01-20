@@ -91,11 +91,12 @@ function App() {
     whileElementsMounted: autoUpdate,
  
     // Or, pass options. Ensure the cleanup function is returned.
-    whileElementsMounted: (reference, floating, update) => (
-      autoUpdate(reference, floating, update, {
-        animationFrame: true,
-      }),
-    )
+    useFloating(reference, floating, {
+      whileElementsMounted: (reference, floating, update) =>
+        autoUpdate(reference, floating, update, {
+          animationFrame: true,
+        }),
+    });
   });
 }
 ```
