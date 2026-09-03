@@ -26,9 +26,8 @@ Pass a plain value for anything that does not:
 useHover(floating.context, { move: false, mouseOnly: true });
 ```
 
-There is no dependency array anywhere in the library, and no equivalent of
-`useMemo` for options. A getter that reads a signal subscribes the internal
-effect that reads it, and nothing else re-runs.
+You never declare what an option depends on. A getter that reads a signal
+subscribes the internal effect that reads it, and nothing else re-runs.
 
 The one thing to avoid is destructuring, which reads the property once and
 freezes the value:

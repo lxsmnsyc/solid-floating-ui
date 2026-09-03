@@ -167,8 +167,8 @@ Utilities:
 
 ### Differences from `@floating-ui/react`
 
-- Options and returned values are reactive getters rather than values captured
-  on render, so there is no dependency array anywhere.
+- Options and returned values are reactive getters, read where they are used,
+  rather than values captured on render.
 - There are no ref containers. Anything the library reads from you is an
   accessor, such as `items` or the `arrow` element, and anything it produces
   arrives through a callback, such as `FloatingList`'s `onElementsChange`.
