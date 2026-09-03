@@ -1,5 +1,14 @@
 # @examples/playground
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [63aa003]
+- Updated dependencies [ea1e9b4]
+- Updated dependencies [f26b5d9]
+  - solid-floating-ui@1.0.1
+
 ## 0.0.1
 
 ### Patch Changes
