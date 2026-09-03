@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingFocusManager,
   FloatingOverlay,
@@ -8,7 +9,7 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { type JSX, Show, createSignal } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 
 export default function DialogDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);

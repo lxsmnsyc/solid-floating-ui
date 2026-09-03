@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingFocusManager,
   FloatingList,
@@ -22,7 +23,7 @@ import {
   useTypeahead,
 } from 'solid-floating-ui';
 import type { UseInteractionsReturn } from 'solid-floating-ui';
-import { type JSX, Show, createContext, createSignal, useContext } from 'solid-js';
+import { Show, createContext, createSignal, useContext } from 'solid-js';
 
 interface MenuContextValue {
   readonly activeIndex: number | null;
@@ -30,7 +31,8 @@ interface MenuContextValue {
   close(): void;
 }
 
-const MenuContext = createContext<MenuContextValue>();
+// A root menu has no parent, so the context needs an explicit default.
+const MenuContext = createContext<MenuContextValue | undefined>(undefined);
 
 export function MenuItem(props: { label: string; onSelect?: () => void }): JSX.Element {
   const menu = useContext(MenuContext);
@@ -206,7 +208,7 @@ export function Menu(props: { label: string; children: JSX.Element }): JSX.Eleme
               }}
               style={floating.floatingStyles}
             >
-              <MenuContext.Provider value={context}>
+              <MenuContext value={context}>
                 <FloatingList
                   onElementsChange={(value) => {
                     setElements(value);
@@ -217,7 +219,7 @@ export function Menu(props: { label: string; children: JSX.Element }): JSX.Eleme
                 >
                   {props.children}
                 </FloatingList>
-              </MenuContext.Provider>
+              </MenuContext>
             </div>
           </FloatingFocusManager>
         </FloatingPortal>

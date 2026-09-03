@@ -1,4 +1,4 @@
-import { createRenderEffect, onCleanup } from 'solid-js';
+import { createEffect, createTrackedEffect } from 'solid-js';
 import type { AnyElementProps } from '../types';
 
 /**
@@ -9,14 +9,30 @@ export type EffectCleanup = (() => void) | undefined;
 /**
  * Runs `effect` whenever its reactive reads change, and registers whatever
  * teardown it returns against that run.
+ *
+ * Tracking and the work happen in the same scope, because which values an
+ * interaction hook reads depends on the branch it takes.
  */
 export function createCleanupEffect(effect: () => EffectCleanup): void {
-  createRenderEffect(() => {
-    const cleanup = effect();
-    if (cleanup) {
-      onCleanup(cleanup);
-    }
-  });
+  createTrackedEffect(effect);
+}
+
+/**
+ * Runs `effect` whenever its reactive reads change. Same scope tracking, as
+ * above, for effects with no teardown.
+ */
+export function createTrackingEffect(effect: () => void): void {
+  createTrackedEffect(effect);
+}
+
+const EMPTY = (): void => {};
+
+/**
+ * Runs `effect` once, after the element is in the document. The compute reads
+ * nothing, so the effect never runs again.
+ */
+export function onMount(effect: () => void): void {
+  createEffect(EMPTY, effect);
 }
 
 /**

@@ -7,7 +7,7 @@ import type {
   Strategy,
   VirtualElement,
 } from '@floating-ui/dom';
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import type { ExtendedUserProps } from './hooks/useInteractions';
 
 export type ReferenceType = Element | VirtualElement;

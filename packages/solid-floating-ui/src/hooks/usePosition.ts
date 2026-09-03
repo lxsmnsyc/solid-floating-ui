@@ -1,10 +1,11 @@
+import type { JSX } from '@solidjs/web';
 import type { ComputePositionConfig } from '@floating-ui/dom';
 import { computePosition } from '@floating-ui/dom';
-import { type JSX, batch, createMemo, createRenderEffect, createSignal, untrack } from 'solid-js';
+import { createMemo, createSignal, untrack } from 'solid-js';
 import type { ReferenceType, UsePositionOptions, UsePositionReturn } from '../types';
 import { roundByDPR } from '../utils/dpr';
 import { error } from '../utils/log';
-import { createCleanupEffect } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 
 interface PositionState {
   x: number;
@@ -92,25 +93,23 @@ export default function usePosition<RT extends ReferenceType = ReferenceType>(
         if (disposed) {
           return;
         }
-        batch(() => {
-          setX(data.x);
-          setY(data.y);
-          setCurrentPlacement(data.placement);
-          setCurrentStrategy(data.strategy);
-          setMiddlewareData(data.middlewareData);
-          // The floating element's position may be recomputed while it's closed
-          // but still mounted (such as when transitioning out). To ensure
-          // `isPositioned` will be `false` initially on the next open, avoid
-          // setting it to `true` when `open === false`.
-          setIsPositioned(positioned);
-        });
+        setX(data.x);
+        setY(data.y);
+        setCurrentPlacement(data.placement);
+        setCurrentStrategy(data.strategy);
+        setMiddlewareData(data.middlewareData);
+        // The floating element's position may be recomputed while it's closed
+        // but still mounted (such as when transitioning out). To ensure
+        // `isPositioned` will be `false` initially on the next open, avoid
+        // setting it to `true` when `open === false`.
+        setIsPositioned(positioned);
       })
       .catch((reason: unknown) => {
         error('`computePosition` failed:', String(reason));
       });
   }
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (options.open === false && isPositioned()) {
       setIsPositioned(false);
     }

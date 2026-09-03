@@ -1,20 +1,17 @@
 import {
   type Accessor,
-  type JSX,
   type Setter,
   Show,
   createContext,
-  createEffect,
-  createRenderEffect,
   createSignal,
   onCleanup,
   useContext,
 } from 'solid-js';
-import { Portal } from 'solid-js/web';
+import { type JSX, Portal } from '@solidjs/web';
 import useId from '../hooks/useId';
 import type { OpenChangeReason } from '../types';
 import { createAttribute } from '../utils/constants';
-import { createCleanupEffect } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 import {
   disableFocusInside,
   enableFocusInside,
@@ -135,7 +132,7 @@ export function useFloatingPortalNode(
     created = null;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (created) {
       return;
     }
@@ -153,7 +150,7 @@ export function useFloatingPortalNode(
     setPortalNode(subRoot);
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const root = props.root;
     // Wait for the root to exist before creating the portal node.
     if (root === null) {
@@ -272,7 +269,7 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
     };
   });
 
-  createEffect(() => {
+  createTrackingEffect(() => {
     const node = portalNode();
     if (!node) {
       return;
@@ -295,7 +292,7 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
   };
 
   return (
-    <PortalContext.Provider value={context}>
+    <PortalContext value={context}>
       <Show when={shouldRenderGuards() && portalNode()}>
         {(node) => (
           <>
@@ -341,7 +338,7 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
           />
         )}
       </Show>
-    </PortalContext.Provider>
+    </PortalContext>
   );
 }
 

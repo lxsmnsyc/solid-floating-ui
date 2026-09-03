@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingFocusManager,
   FloatingPortal,
@@ -11,7 +12,7 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { type JSX, Show, createSignal, onCleanup } from 'solid-js';
+import { Show, createSignal, onCleanup } from 'solid-js';
 
 export default function PopoverDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);

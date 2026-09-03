@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingFocusManager,
   FloatingList,
@@ -17,7 +18,7 @@ import {
   useTypeahead,
 } from 'solid-floating-ui';
 import type { UseInteractionsReturn } from 'solid-floating-ui';
-import { For, type JSX, Show, createSignal } from 'solid-js';
+import { For, Show, createSignal } from 'solid-js';
 
 const FRUITS = [
   'Apple',
@@ -55,7 +56,7 @@ function Option(props: {
       class="option"
       role="option"
       tabindex={-1}
-      aria-selected={isSelected()}
+      aria-selected={isSelected() ? 'true' : 'false'}
       data-active={isActive()}
       {...props.getItemProps({
         active: isActive(),

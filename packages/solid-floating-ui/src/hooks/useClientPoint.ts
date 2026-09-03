@@ -1,9 +1,9 @@
 import { getWindow } from '@floating-ui/utils/dom';
-import { createRenderEffect, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 import type { AnyElementProps, ContextData, ElementProps, FloatingRootContext } from '../types';
 import { contains, getTarget } from '../utils/element';
 import { isMouseLikePointerType } from '../utils/event';
-import { createCleanupEffect } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 
 interface VirtualElementData {
   axis: 'x' | 'y' | 'both';
@@ -216,19 +216,19 @@ export function useClientPoint(
     return undefined;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (enabled() && !context.elements.floating) {
       initial = false;
     }
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!enabled() && context.open) {
       initial = true;
     }
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (enabled() && (x() != null || y() != null)) {
       initial = false;
       setReference(x(), y());

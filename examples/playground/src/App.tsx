@@ -1,5 +1,5 @@
-import { For, type JSX, Show, createSignal, onCleanup } from 'solid-js';
-import { Dynamic } from 'solid-js/web';
+import { For, Show, createSignal, onCleanup } from 'solid-js';
+import { Dynamic, type JSX } from '@solidjs/web';
 import { DEMOS, type DemoEntry } from './demos';
 
 function currentId(): string {

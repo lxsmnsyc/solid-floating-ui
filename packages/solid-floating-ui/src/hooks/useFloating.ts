@@ -1,6 +1,7 @@
+import { createTrackingEffect } from '../utils/reactivity';
 import type { VirtualElement } from '@floating-ui/dom';
 import { isElement } from '@floating-ui/utils/dom';
-import { createMemo, createRenderEffect, createSignal } from 'solid-js';
+import { createMemo, createSignal } from 'solid-js';
 import { useFloatingTree } from '../components/FloatingTree';
 import type {
   FloatingContext,
@@ -165,7 +166,7 @@ export default function useFloating(options: UseFloatingOptions = {}): UseFloati
 
   rootContext.data.floatingContext = context;
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const node = tree?.nodes().find((n) => n.id === options.nodeId);
     if (node) {
       node.context = context;

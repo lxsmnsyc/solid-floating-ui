@@ -1,12 +1,6 @@
-import {
-  type JSX,
-  createContext,
-  createMemo,
-  createRenderEffect,
-  createSignal,
-  onCleanup,
-  useContext,
-} from 'solid-js';
+import { createTrackingEffect } from '../utils/reactivity';
+import type { JSX } from '@solidjs/web';
+import { createContext, createMemo, createSignal, onCleanup, useContext } from 'solid-js';
 
 function sortByDocumentPosition(a: Node, b: Node): number {
   const position = a.compareDocumentPosition(b);
@@ -97,11 +91,11 @@ export function FloatingList(props: FloatingListProps): JSX.Element {
     return result;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     props.onElementsChange?.(sorted().map((node) => (node instanceof HTMLElement ? node : null)));
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const currentLabels = labels();
     props.onLabelsChange?.(sorted().map((node) => currentLabels.get(node) ?? null));
   });
@@ -115,9 +109,7 @@ export function FloatingList(props: FloatingListProps): JSX.Element {
     },
   };
 
-  return (
-    <FloatingListContext.Provider value={context}>{props.children}</FloatingListContext.Provider>
-  );
+  return <FloatingListContext value={context}>{props.children}</FloatingListContext>;
 }
 
 export interface UseListItemProps {
@@ -158,7 +150,7 @@ export function useListItem(props: UseListItemProps = {}): UseListItemReturn {
     }
   }
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const node = element();
     if (node) {
       listContext.setLabel(node, props.label === undefined ? node.textContent : props.label);

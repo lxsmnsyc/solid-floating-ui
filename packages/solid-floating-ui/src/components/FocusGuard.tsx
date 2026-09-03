@@ -1,4 +1,6 @@
-import { type JSX, createSignal, onMount } from 'solid-js';
+import type { JSX } from '@solidjs/web';
+import { onMount } from '../utils/reactivity';
+import { createSignal } from 'solid-js';
 import { createAttribute } from '../utils/constants';
 import { isSafari } from '../utils/platform';
 

@@ -1,12 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import type { Dimensions } from '@floating-ui/dom';
-import {
-  type JSX,
-  createContext,
-  createSignal,
-  mergeProps,
-  splitProps,
-  useContext,
-} from 'solid-js';
+import { createContext, createSignal, merge, omit, useContext } from 'solid-js';
 import useMergeRefs from '../hooks/useMergeRefs';
 import type { AnyElementProps } from '../types';
 import {
@@ -126,7 +120,9 @@ const allKeys = [...horizontalKeys, ...verticalKeys];
  * an example of a composite, with each reference element being an item.
  */
 export function Composite(props: CompositeProps): JSX.Element {
-  const [local, domProps] = splitProps(props, [
+  const local = props;
+  const domProps = omit(
+    props,
     'render',
     'orientation',
     'loop',
@@ -138,7 +134,7 @@ export function Composite(props: CompositeProps): JSX.Element {
     'itemSizes',
     'dense',
     'onKeyDown',
-  ]);
+  );
 
   const orientation = (): 'horizontal' | 'vertical' | 'both' => local.orientation ?? 'both';
   const loop = (): boolean => local.loop ?? true;
@@ -302,9 +298,9 @@ export function Composite(props: CompositeProps): JSX.Element {
     return value === 'both' ? undefined : value;
   };
 
-  // `mergeProps` keeps each value lazy without rebuilding the object, so the
+  // `merge` keeps each value lazy without rebuilding the object, so the
   // element's own ref is read once while the reactive props stay live.
-  const computedProps = mergeProps(domProps, {
+  const computedProps = merge(domProps, {
     get 'aria-orientation'() {
       return ariaOrientation();
     },
@@ -315,7 +311,7 @@ export function Composite(props: CompositeProps): JSX.Element {
   }) as AnyElementProps;
 
   return (
-    <CompositeContext.Provider value={context}>
+    <CompositeContext value={context}>
       <FloatingList
         onElementsChange={(value) => {
           setItems(value);
@@ -323,7 +319,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       >
         {renderJsx(local.render, computedProps)}
       </FloatingList>
-    </CompositeContext.Provider>
+    </CompositeContext>
   );
 }
 
@@ -347,14 +343,15 @@ export interface CompositeItemProps extends Omit<
 }
 
 export function CompositeItem(props: CompositeItemProps): JSX.Element {
-  const [local, domProps] = splitProps(props, ['render', 'ref', 'onFocus']);
+  const local = props;
+  const domProps = omit(props, 'render', 'ref', 'onFocus');
 
   const compositeContext = useContext(CompositeContext);
   const listItem = useListItem();
   const mergedRef = useMergeRefs<HTMLElement>([listItem.ref, local.ref]);
   const isActive = (): boolean => compositeContext.activeIndex === listItem.index;
 
-  const computedProps = mergeProps(domProps, {
+  const computedProps = merge(domProps, {
     ref: mergedRef,
     get tabindex() {
       return isActive() ? 0 : -1;

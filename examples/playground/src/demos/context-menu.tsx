@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingPortal,
   autoUpdate,
@@ -10,7 +11,7 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { For, type JSX, Show, createSignal } from 'solid-js';
+import { For, Show, createSignal } from 'solid-js';
 
 const ACTIONS = ['Cut', 'Copy', 'Paste', 'Delete'];
 

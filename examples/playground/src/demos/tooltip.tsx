@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingPortal,
   autoUpdate,
@@ -11,7 +12,7 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { type JSX, Show, createSignal } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 
 function Tooltip(props: { label: string; delay: number; children: string }): JSX.Element {
   const [open, setOpen] = createSignal(false);

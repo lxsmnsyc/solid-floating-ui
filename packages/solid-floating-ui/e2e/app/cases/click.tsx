@@ -1,5 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import { useClick, useDismiss, useFloating, useInteractions, useRole } from 'solid-floating-ui';
-import { type JSX, Show, createSignal } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 
 export default function ClickCase(): JSX.Element {
   const [open, setOpen] = createSignal(false);

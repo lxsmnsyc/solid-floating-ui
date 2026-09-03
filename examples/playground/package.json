@@ -11,13 +11,14 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
+    "@solidjs/web": "^2.0.0-rc.6",
     "solid-floating-ui": "workspace:*",
-    "solid-js": "^1.9.9"
+    "solid-js": "^2.0.0-rc.6"
   },
   "devDependencies": {
+    "@solidjs/vite-plugin": "^3.0.0-next.38",
     "@types/node": "^24.7.0",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9",
-    "vite-plugin-solid": "^2.11.9"
+    "vite": "^8.2.2"
   }
 }

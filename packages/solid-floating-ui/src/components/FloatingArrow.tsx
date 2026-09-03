@@ -1,6 +1,7 @@
+import type { JSX } from '@solidjs/web';
 import type { Alignment, Placement, Side } from '@floating-ui/dom';
 import { getComputedStyle } from '@floating-ui/utils/dom';
-import { type JSX, Show, createEffect, createSignal, splitProps } from 'solid-js';
+import { Show, createSignal, createTrackedEffect, omit } from 'solid-js';
 import useId from '../hooks/useId';
 import type { FloatingContext } from '../types';
 
@@ -62,7 +63,9 @@ export interface FloatingArrowProps extends JSX.SvgSVGAttributes<SVGSVGElement> 
  * Renders a pointing arrow triangle.
  */
 export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
-  const [local, rest] = splitProps(props, [
+  const local = props;
+  const rest = omit(
+    props,
     'context',
     'width',
     'height',
@@ -72,7 +75,7 @@ export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
     'stroke',
     'd',
     'style',
-  ]);
+  );
 
   const width = (): number => local.width ?? 14;
   const height = (): number => local.height ?? 7;
@@ -83,7 +86,7 @@ export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
   const [isRTL, setIsRTL] = createSignal(false);
 
   // https://github.com/floating-ui/floating-ui/issues/2932
-  createEffect(() => {
+  createTrackedEffect(() => {
     const floating = local.context.elements.floating;
     if (!floating) {
       return;

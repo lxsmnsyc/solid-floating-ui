@@ -7,7 +7,7 @@ import {
   isLastTraversableNode,
   isWebKit,
 } from '@floating-ui/utils/dom';
-import { createRenderEffect, on } from 'solid-js';
+import { createEffect } from 'solid-js';
 import { useFloatingTree } from '../components/FloatingTree';
 import type { AnyElementProps, ElementProps, FloatingRootContext } from '../types';
 import { createAttribute } from '../utils/constants';
@@ -422,10 +422,11 @@ export function useDismiss(
     };
   });
 
-  createRenderEffect(
-    on([outsidePress, outsidePressEvent], () => {
+  createEffect(
+    () => [outsidePress(), outsidePressEvent()],
+    () => {
       context.data.insideTree = false;
-    }),
+    },
   );
 
   function referenceProps(): AnyElementProps {

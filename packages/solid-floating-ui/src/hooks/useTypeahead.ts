@@ -1,4 +1,4 @@
-import { createRenderEffect } from 'solid-js';
+import { createTrackingEffect } from '../utils/reactivity';
 import type { AnyElementProps, ElementProps, FloatingRootContext } from '../types';
 import { stopEvent } from '../utils/event';
 import { clearTimeoutIfSet } from '../utils/schedule';
@@ -68,7 +68,7 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
   let prevIndex: number | null = selectedIndex() ?? props.activeIndex ?? -1;
   let matchIndex: number | null = null;
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (context.open) {
       timeoutId = clearTimeoutIfSet(timeoutId);
       matchIndex = null;
@@ -76,7 +76,7 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
     }
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const nextIndex = selectedIndex() ?? props.activeIndex ?? -1;
     // Sync arrow key navigation but not typeahead navigation.
     if (context.open && typedString === '') {

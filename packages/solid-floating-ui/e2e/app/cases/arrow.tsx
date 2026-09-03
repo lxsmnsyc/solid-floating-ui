@@ -1,5 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import { FloatingArrow, arrow, offset, useFloating } from 'solid-floating-ui';
-import { type JSX, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 
 export default function ArrowCase(): JSX.Element {
   const [arrowElement, setArrowElement] = createSignal<Element | null>(null);

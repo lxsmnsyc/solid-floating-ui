@@ -1,4 +1,6 @@
-import { type JSX, onCleanup, onMount, splitProps } from 'solid-js';
+import type { JSX } from '@solidjs/web';
+import { onMount } from '../utils/reactivity';
+import { omit, onCleanup } from 'solid-js';
 import { getPlatform } from '../utils/platform';
 
 let lockCount = 0;
@@ -77,25 +79,33 @@ let cleanupScrollLock: () => void = () => {};
  * be styled with any CSS solution.
  */
 export function FloatingOverlay(props: FloatingOverlayProps): JSX.Element {
-  const [local, rest] = splitProps(props, ['lockScroll', 'style']);
+  const local = props;
+  const rest = omit(props, 'lockScroll', 'style');
+
+  let locked = false;
 
   onMount(() => {
     if (!local.lockScroll) {
       return;
     }
 
+    locked = true;
     lockCount++;
 
     if (lockCount === 1) {
       cleanupScrollLock = enableScrollLock();
     }
+  });
 
-    onCleanup(() => {
-      lockCount--;
-      if (lockCount === 0) {
-        cleanupScrollLock();
-      }
-    });
+  onCleanup(() => {
+    if (!locked) {
+      return;
+    }
+
+    lockCount--;
+    if (lockCount === 0) {
+      cleanupScrollLock();
+    }
   });
 
   const style = (): JSX.CSSProperties => ({

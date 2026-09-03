@@ -1,4 +1,5 @@
-import { type JSX, createContext, createSignal, onCleanup, useContext } from 'solid-js';
+import type { JSX } from '@solidjs/web';
+import { createContext, createSignal, onCleanup, useContext } from 'solid-js';
 import useId from '../hooks/useId';
 import type { FloatingNodeType, FloatingTreeType } from '../types';
 import createEventEmitter from '../utils/createEventEmitter';
@@ -56,9 +57,7 @@ export function FloatingNode(props: FloatingNodeProps): JSX.Element {
     parentId,
   };
 
-  return (
-    <FloatingNodeContext.Provider value={context}>{props.children}</FloatingNodeContext.Provider>
-  );
+  return <FloatingNodeContext value={context}>{props.children}</FloatingNodeContext>;
 }
 
 export interface FloatingTreeProps {
@@ -88,7 +87,5 @@ export function FloatingTree(props: FloatingTreeProps): JSX.Element {
     },
   };
 
-  return (
-    <FloatingTreeContext.Provider value={context}>{props.children}</FloatingTreeContext.Provider>
-  );
+  return <FloatingTreeContext value={context}>{props.children}</FloatingTreeContext>;
 }

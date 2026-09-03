@@ -1,5 +1,4 @@
-import type { JSX } from 'solid-js';
-import { render } from 'solid-js/web';
+import { type JSX, render } from '@solidjs/web';
 import ArrowCase from './cases/arrow';
 import ClickCase from './cases/click';
 import CompositeCase from './cases/composite';

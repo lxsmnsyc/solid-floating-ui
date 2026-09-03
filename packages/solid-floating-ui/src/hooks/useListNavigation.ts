@@ -1,6 +1,6 @@
 import type { Dimensions } from '@floating-ui/dom';
 import { isHTMLElement } from '@floating-ui/utils/dom';
-import { DEV, createRenderEffect, createSignal } from 'solid-js';
+import { DEV, createSignal } from 'solid-js';
 import { useFloatingParentNodeId, useFloatingTree } from '../components/FloatingTree';
 import type { AnyElementProps, ElementProps, FloatingRootContext } from '../types';
 import {
@@ -28,7 +28,7 @@ import { enqueueFocus } from '../utils/schedule';
 import { isVirtualClick, isVirtualPointerEvent, stopEvent } from '../utils/event';
 import { warn } from '../utils/log';
 import { getDeepestNode } from '../utils/nodes';
-import { createCleanupEffect, lazyProps } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect, lazyProps } from '../utils/reactivity';
 
 export const ESCAPE = 'Escape';
 
@@ -288,7 +288,7 @@ export function useListNavigation(
   const parentId = useFloatingParentNodeId();
   const tree = useFloatingTree();
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     context.data.orientation = orientation();
   });
 
@@ -376,7 +376,7 @@ export function useListNavigation(
 
   // Sync `selectedIndex` to be the `activeIndex` upon opening the floating
   // element. Also, reset `activeIndex` upon closing the floating element.
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -399,7 +399,7 @@ export function useListNavigation(
 
   // Sync `activeIndex` to be the focused item while the floating element is
   // open.
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -464,7 +464,7 @@ export function useListNavigation(
 
   // Ensure the parent floating element has focus when a nested child closes
   // to allow arrow key navigation to work after the pointer leaves the child.
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!enabled() || context.elements.floating || !tree || virtual() || !previousMounted) {
       return;
     }
@@ -509,13 +509,13 @@ export function useListNavigation(
 
   // Declared last so the effects above still see the values from the previous
   // run before this one overwrites them.
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     previousOnNavigate = onNavigate;
     previousOpen = context.open;
     previousMounted = !!context.elements.floating;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!context.open) {
       key = null;
       currentFocusItemOnOpen = focusItemOnOpen();
