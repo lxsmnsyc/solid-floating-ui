@@ -185,7 +185,6 @@ export interface FloatingFocusManagerProps {
 
 /**
  * Provides focus management for the floating element.
- * @see https://floating-ui.com/docs/FloatingFocusManager
  */
 export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Element {
   const context = props.context;
@@ -201,7 +200,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
   const outsideElementsInert = (): boolean => props.outsideElementsInert ?? false;
   const getInsideElements = (): Element[] => props.getInsideElements?.() ?? [];
 
-  const getNodeId = (): string | undefined => context.dataRef.current.floatingContext?.nodeId;
+  const getNodeId = (): string | undefined => context.data.floatingContext?.nodeId;
 
   const ignoreInitialFocus = (): boolean => {
     const value = initialFocus();
@@ -369,12 +368,12 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
           contains(portalContext?.portalNode, relatedTarget) ||
           relatedTarget?.hasAttribute(createAttribute('focus-guard')) === true ||
           (tree !== null &&
-            (getNodeChildren(tree.nodesRef.current, nodeId).some(
+            (getNodeChildren(tree.nodes(), nodeId).some(
               (node) =>
                 contains(node.context?.elements.floating, relatedTarget) ||
                 contains(node.context?.elements.domReference, relatedTarget),
             ) ||
-              getNodeAncestors(tree.nodesRef.current, nodeId).some(
+              getNodeAncestors(tree.nodes(), nodeId).some(
                 (node) =>
                   node.context?.elements.floating === relatedTarget ||
                   getFloatingFocusElement(node.context?.elements.floating) === relatedTarget ||
@@ -414,8 +413,8 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
         }
 
         // https://github.com/floating-ui/floating-ui/issues/3060
-        if (context.dataRef.current.insideTree) {
-          context.dataRef.current.insideTree = false;
+        if (context.data.insideTree) {
+          context.data.insideTree = false;
           return;
         }
 
@@ -438,9 +437,9 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
 
     function markInsideTree(): void {
       blurTimeoutId = clearTimeoutIfSet(blurTimeoutId);
-      context.dataRef.current.insideTree = true;
+      context.data.insideTree = true;
       blurTimeoutId = window.setTimeout(() => {
-        context.dataRef.current.insideTree = false;
+        context.data.insideTree = false;
       });
     }
 
@@ -483,7 +482,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
       portalContext?.portalNode?.querySelectorAll(`[${createAttribute('portal')}]`) ?? [],
     );
 
-    const ancestors = tree ? getNodeAncestors(tree.nodesRef.current, getNodeId()) : [];
+    const ancestors = tree ? getNodeAncestors(tree.nodes(), getNodeId()) : [];
     const rootAncestorComboboxDomReference = ancestors.find((node) =>
       isTypeableCombobox(node.context?.elements.domReference ?? null),
     )?.context?.elements.domReference;
@@ -497,8 +496,8 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
       endDismissButton,
       beforeGuard,
       afterGuard,
-      portalContext?.beforeOutsideRef.current,
-      portalContext?.afterOutsideRef.current,
+      portalContext?.guards.beforeOutside(),
+      portalContext?.guards.afterOutside(),
       order().includes('reference') || isUntrappedTypeableCombobox() ? domReference : null,
     ].filter((x): x is Element => x != null);
 
@@ -634,7 +633,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
       const isFocusInsideFloatingTree =
         contains(floating, activeEl) ||
         (tree &&
-          getNodeChildren(tree.nodesRef.current, getNodeId(), false).some((node) =>
+          getNodeChildren(tree.nodes(), getNodeId(), false).some((node) =>
             contains(node.context?.elements.floating, activeEl),
           ));
 
@@ -751,7 +750,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
           ref={(element) => {
             beforeGuard = element;
             if (portalContext) {
-              portalContext.beforeInsideRef.current = element;
+              portalContext.guards.setBeforeInside(element);
             }
           }}
           onFocus={(event: FocusEvent) => {
@@ -763,7 +762,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
               if (isOutsideEvent(event, portalContext.portalNode)) {
                 getNextTabbable(context.elements.domReference)?.focus();
               } else {
-                portalContext.beforeOutsideRef.current?.focus();
+                portalContext.guards.beforeOutside()?.focus();
               }
             }
           }}
@@ -782,7 +781,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
           ref={(element) => {
             afterGuard = element;
             if (portalContext) {
-              portalContext.afterInsideRef.current = element;
+              portalContext.guards.setAfterInside(element);
             }
           }}
           onFocus={(event: FocusEvent) => {
@@ -796,7 +795,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
               if (isOutsideEvent(event, portalContext.portalNode)) {
                 getPreviousTabbable(context.elements.domReference)?.focus();
               } else {
-                portalContext.afterOutsideRef.current?.focus();
+                portalContext.guards.afterOutside()?.focus();
               }
             }
           }}

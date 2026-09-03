@@ -57,8 +57,7 @@ export { useInteractions } from './hooks/useInteractions';
 export type { ExtendedUserProps, UseInteractionsReturn } from './hooks/useInteractions';
 export { useListNavigation } from './hooks/useListNavigation';
 export type { UseListNavigationProps } from './hooks/useListNavigation';
-export { useMergeRefs } from './hooks/useMergeRefs';
-export type { RefLike } from './hooks/useMergeRefs';
+export { default as useMergeRefs } from './hooks/useMergeRefs';
 export { default as usePosition } from './hooks/usePosition';
 export { useRole } from './hooks/useRole';
 export type { UseRoleProps } from './hooks/useRole';
@@ -77,8 +76,6 @@ export type { InnerProps, UseInnerOffsetProps } from './inner';
 export { safePolygon } from './safePolygon';
 export type { SafePolygonOptions } from './safePolygon';
 export type * from './types';
-export type { Ref } from './utils/ref';
-export { createRef } from './utils/ref';
 
 export { arrow } from './arrow';
 export type { ArrowOptions } from './arrow';

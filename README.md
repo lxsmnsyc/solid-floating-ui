@@ -149,17 +149,15 @@ Components:
 Utilities:
 
 - `useId`, `useMergeRefs`, `useTransitionStatus`, `useTransitionStyles`
-- `createRef` for the `{ current }` containers the library writes into, such as
-  `elementsRef`
 - `solid-floating-ui/utils` for the DOM helpers Floating UI exposes
 
 ### Differences from `@floating-ui/react`
 
 - Options and returned values are reactive getters rather than values captured
   on render, so there is no dependency array anywhere.
-- Anything the library only reads, such as `listRef` or an arrow element, is an
-  accessor rather than a ref. `createRef()` is left for the containers the
-  library writes into, such as `FloatingList`'s `elementsRef`.
+- There are no ref containers. Anything the library reads from you is an
+  accessor, such as `items` or the `arrow` element, and anything it produces
+  arrives through a callback, such as `FloatingList`'s `onElementsChange`.
 - `Composite` and `CompositeItem` take a `render` callback only, because
   SolidJS has no `cloneElement`.
 - Prop getters produce SolidJS event names, so `onFocusIn` and `onFocusOut`

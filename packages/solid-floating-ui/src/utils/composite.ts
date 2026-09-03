@@ -7,39 +7,38 @@ import { stopEvent } from './event';
 export type DisabledIndices = number[] | ((index: number) => boolean);
 
 /**
- * Reads the list items in index order. The library only ever reads them, so an
- * accessor is enough and there is no container to keep in sync.
+ * Reads the list items in index order.
  */
-export type ListRef = () => (HTMLElement | null)[];
+export type ListItems = () => (HTMLElement | null)[];
 
 export function isDifferentGridRow(index: number, cols: number, prevRow: number): boolean {
   return Math.floor(index / cols) !== prevRow;
 }
 
-export function isIndexOutOfListBounds(listRef: ListRef, index: number): boolean {
-  return index < 0 || index >= listRef().length;
+export function isIndexOutOfListBounds(items: ListItems, index: number): boolean {
+  return index < 0 || index >= items().length;
 }
 
 export function getMinListIndex(
-  listRef: ListRef,
+  items: ListItems,
   disabledIndices: DisabledIndices | undefined,
 ): number {
-  return findNonDisabledListIndex(listRef, { disabledIndices });
+  return findNonDisabledListIndex(items, { disabledIndices });
 }
 
 export function getMaxListIndex(
-  listRef: ListRef,
+  items: ListItems,
   disabledIndices: DisabledIndices | undefined,
 ): number {
-  return findNonDisabledListIndex(listRef, {
+  return findNonDisabledListIndex(items, {
     decrement: true,
-    startingIndex: listRef().length,
+    startingIndex: items().length,
     disabledIndices,
   });
 }
 
 export function findNonDisabledListIndex(
-  listRef: ListRef,
+  items: ListItems,
   {
     startingIndex = -1,
     decrement = false,
@@ -57,15 +56,15 @@ export function findNonDisabledListIndex(
     index += decrement ? -amount : amount;
   } while (
     index >= 0 &&
-    index <= listRef().length - 1 &&
-    isListIndexDisabled(listRef, index, disabledIndices)
+    index <= items().length - 1 &&
+    isListIndexDisabled(items, index, disabledIndices)
   );
 
   return index;
 }
 
 export function getGridNavigatedIndex(
-  listRef: ListRef,
+  items: ListItems,
   {
     event,
     orientation,
@@ -100,7 +99,7 @@ export function getGridNavigatedIndex(
     if (prevIndex === -1) {
       nextIndex = maxIndex;
     } else {
-      nextIndex = findNonDisabledListIndex(listRef, {
+      nextIndex = findNonDisabledListIndex(items, {
         startingIndex: nextIndex,
         amount: cols,
         decrement: true,
@@ -120,7 +119,7 @@ export function getGridNavigatedIndex(
       }
     }
 
-    if (isIndexOutOfListBounds(listRef, nextIndex)) {
+    if (isIndexOutOfListBounds(items, nextIndex)) {
       nextIndex = prevIndex;
     }
   }
@@ -133,14 +132,14 @@ export function getGridNavigatedIndex(
     if (prevIndex === -1) {
       nextIndex = minIndex;
     } else {
-      nextIndex = findNonDisabledListIndex(listRef, {
+      nextIndex = findNonDisabledListIndex(items, {
         startingIndex: prevIndex,
         amount: cols,
         disabledIndices,
       });
 
       if (loop && prevIndex + cols > maxIndex) {
-        nextIndex = findNonDisabledListIndex(listRef, {
+        nextIndex = findNonDisabledListIndex(items, {
           startingIndex: (prevIndex % cols) - cols,
           amount: cols,
           disabledIndices,
@@ -148,7 +147,7 @@ export function getGridNavigatedIndex(
       }
     }
 
-    if (isIndexOutOfListBounds(listRef, nextIndex)) {
+    if (isIndexOutOfListBounds(items, nextIndex)) {
       nextIndex = prevIndex;
     }
   }
@@ -163,19 +162,19 @@ export function getGridNavigatedIndex(
       }
 
       if (prevIndex % cols !== cols - 1) {
-        nextIndex = findNonDisabledListIndex(listRef, {
+        nextIndex = findNonDisabledListIndex(items, {
           startingIndex: prevIndex,
           disabledIndices,
         });
 
         if (loop && isDifferentGridRow(nextIndex, cols, prevRow)) {
-          nextIndex = findNonDisabledListIndex(listRef, {
+          nextIndex = findNonDisabledListIndex(items, {
             startingIndex: prevIndex - (prevIndex % cols) - 1,
             disabledIndices,
           });
         }
       } else if (loop) {
-        nextIndex = findNonDisabledListIndex(listRef, {
+        nextIndex = findNonDisabledListIndex(items, {
           startingIndex: prevIndex - (prevIndex % cols) - 1,
           disabledIndices,
         });
@@ -192,21 +191,21 @@ export function getGridNavigatedIndex(
       }
 
       if (prevIndex % cols !== 0) {
-        nextIndex = findNonDisabledListIndex(listRef, {
+        nextIndex = findNonDisabledListIndex(items, {
           startingIndex: prevIndex,
           decrement: true,
           disabledIndices,
         });
 
         if (loop && isDifferentGridRow(nextIndex, cols, prevRow)) {
-          nextIndex = findNonDisabledListIndex(listRef, {
+          nextIndex = findNonDisabledListIndex(items, {
             startingIndex: prevIndex + (cols - (prevIndex % cols)),
             decrement: true,
             disabledIndices,
           });
         }
       } else if (loop) {
-        nextIndex = findNonDisabledListIndex(listRef, {
+        nextIndex = findNonDisabledListIndex(items, {
           startingIndex: prevIndex + (cols - (prevIndex % cols)),
           decrement: true,
           disabledIndices,
@@ -220,12 +219,12 @@ export function getGridNavigatedIndex(
 
     const lastRow = floor(maxIndex / cols) === prevRow;
 
-    if (isIndexOutOfListBounds(listRef, nextIndex)) {
+    if (isIndexOutOfListBounds(items, nextIndex)) {
       if (loop && lastRow) {
         nextIndex =
           event.key === (rtl ? ARROW_RIGHT : ARROW_LEFT)
             ? maxIndex
-            : findNonDisabledListIndex(listRef, {
+            : findNonDisabledListIndex(items, {
                 startingIndex: prevIndex - (prevIndex % cols) - 1,
                 disabledIndices,
               });
@@ -320,7 +319,7 @@ export function getGridCellIndices(
 }
 
 export function isListIndexDisabled(
-  listRef: ListRef,
+  items: ListItems,
   index: number,
   disabledIndices?: DisabledIndices,
 ): boolean {
@@ -330,7 +329,7 @@ export function isListIndexDisabled(
     return disabledIndices.includes(index);
   }
 
-  const element = listRef()[index];
+  const element = items()[index];
   return (
     element == null ||
     element.hasAttribute('disabled') ||

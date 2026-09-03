@@ -1,11 +1,10 @@
 import type { ComputePositionConfig } from '@floating-ui/dom';
 import { computePosition } from '@floating-ui/dom';
-import { type JSX, batch, createMemo, createRenderEffect, createSignal } from 'solid-js';
+import { type JSX, batch, createMemo, createRenderEffect, createSignal, untrack } from 'solid-js';
 import type { ReferenceType, UsePositionOptions, UsePositionReturn } from '../types';
 import { roundByDPR } from '../utils/dpr';
 import { error } from '../utils/log';
 import { createCleanupEffect } from '../utils/reactivity';
-import { createRef } from '../utils/ref';
 
 interface PositionState {
   x: number;
@@ -43,9 +42,6 @@ export default function usePosition<RT extends ReferenceType = ReferenceType>(
   const [internalReference, setInternalReference] = createSignal<RT | null>(null);
   const [internalFloating, setInternalFloating] = createSignal<HTMLElement | null>(null);
 
-  const referenceRef = createRef<RT | null>(null);
-  const floatingRef = createRef<HTMLElement | null>(null);
-
   const referenceEl = createMemo<RT | null>(
     () => options.elements?.reference ?? internalReference(),
   );
@@ -54,15 +50,13 @@ export default function usePosition<RT extends ReferenceType = ReferenceType>(
   );
 
   function setReference(node: RT | null): void {
-    if (node !== referenceRef.current) {
-      referenceRef.current = node;
+    if (node !== untrack(internalReference)) {
       setInternalReference(() => node);
     }
   }
 
   function setFloating(node: HTMLElement | null): void {
-    if (node !== floatingRef.current) {
-      floatingRef.current = node;
+    if (node !== untrack(internalFloating)) {
       setInternalFloating(node);
     }
   }
@@ -84,8 +78,8 @@ export default function usePosition<RT extends ReferenceType = ReferenceType>(
   }
 
   function update(config: ComputePositionConfig = currentConfig()): void {
-    const reference = referenceRef.current;
-    const floating = floatingRef.current;
+    const reference = untrack(referenceEl);
+    const floating = untrack(floatingEl);
 
     if (!reference || !floating) {
       return;
@@ -137,13 +131,6 @@ export default function usePosition<RT extends ReferenceType = ReferenceType>(
     // changes, and not only when the elements themselves do.
     const config = currentConfig();
 
-    if (reference) {
-      referenceRef.current = reference;
-    }
-    if (floating) {
-      floatingRef.current = floating;
-    }
-
     if (reference && floating) {
       if (options.whileElementsMounted) {
         return options.whileElementsMounted(reference, floating, () => {
@@ -186,8 +173,6 @@ export default function usePosition<RT extends ReferenceType = ReferenceType>(
   });
 
   const refs = {
-    reference: referenceRef,
-    floating: floatingRef,
     setReference,
     setFloating,
   };

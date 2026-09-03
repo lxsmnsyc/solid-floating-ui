@@ -54,32 +54,49 @@ Live properties: `x`, `y`, `placement`, `strategy`, `middlewareData`,
 `isPositioned`, `floatingStyles`, `context.open`, and everything under
 `elements`.
 
-## Accessors versus refs
+## Accessors in, callbacks out
 
-The library takes an accessor wherever it only reads a value:
+The library takes an accessor wherever it only reads a value you own:
 
-| Option                                                    | Type                                      |
-| --------------------------------------------------------- | ----------------------------------------- |
-| `listRef` on `useListNavigation`, `useTypeahead`, `inner` | `() => T[]`                               |
-| `scrollRef` on `inner`, `useInnerOffset`                  | `() => HTMLElement \| null`               |
-| `element` on `arrow`                                      | `() => Element \| null`                   |
-| `root` on `FloatingPortal`                                | `() => HTMLElement \| ShadowRoot \| null` |
-| `initialFocus`, `returnFocus` on `FloatingFocusManager`   | `() => HTMLElement \| null`               |
+| Option                                                  | Type                                      |
+| ------------------------------------------------------- | ----------------------------------------- |
+| `items` on `useListNavigation`, `inner`                 | `() => (HTMLElement \| null)[]`           |
+| `labels` on `useTypeahead`                              | `() => (string \| null)[]`                |
+| `scrollElement` on `inner`, `useInnerOffset`            | `() => HTMLElement \| null`               |
+| `overflow` on `useInnerOffset`                          | `() => SideObject \| null`                |
+| `element` on `arrow`                                    | `() => Element \| null`                   |
+| `root` on `FloatingPortal`                              | `() => HTMLElement \| ShadowRoot \| null` |
+| `initialFocus`, `returnFocus` on `FloatingFocusManager` | `() => HTMLElement \| null`               |
 
-`createRef()` produces the `{ current }` container the library writes into:
-`elementsRef` and `labelsRef` on `FloatingList`, `virtualItemRef` on
-`useListNavigation`, `overflowRef` on `inner` and `useInnerOffset`.
+It hands values back through a callback wherever it produces one:
 
-They meet when `FloatingList` collects the items a navigation hook reads:
+| Option                                       | Type                                          |
+| -------------------------------------------- | --------------------------------------------- |
+| `onElementsChange` on `FloatingList`         | `(elements: (HTMLElement \| null)[]) => void` |
+| `onLabelsChange` on `FloatingList`           | `(labels: (string \| null)[]) => void`        |
+| `onVirtualItemChange` on `useListNavigation` | `(item: HTMLElement \| null) => void`         |
+| `onOverflowChange` on `inner`                | `(overflow: SideObject) => void`              |
+
+There is no ref container in the API. The two halves meet through a signal you
+own:
 
 ```jsx
-const elementsRef = createRef([]);
+const [items, setItems] = createSignal([]);
 
-useListNavigation(floating.context, {
-  listRef: () => elementsRef.current,
-  /* ... */
-});
+useListNavigation(floating.context, { items /* ... */ });
+
+<FloatingList
+  onElementsChange={(value) => {
+    setItems(value);
+  }}
+>
+  {/* ... */}
+</FloatingList>;
 ```
+
+Two things are plain mutable objects rather than signals, because writing to
+them must not re-run anything: `context.data`, the state the hooks share, and
+the bookkeeping inside a delay group.
 
 ## Attaching the elements
 
@@ -148,14 +165,14 @@ cheaper strategies miss, at a real cost, so reach for it last.
 
 ## Common failures
 
-| Symptom                                    | Cause                                                                         |
-| ------------------------------------------ | ----------------------------------------------------------------------------- |
-| Nothing updates when a signal changes      | An option was passed as a value instead of a getter, or destructured.         |
-| The element is clipped or behind something | It needs `FloatingPortal`.                                                    |
-| It never moves while scrolling             | `whileElementsMounted: autoUpdate` is missing.                                |
-| Escape or an outside click does nothing    | `useDismiss` is missing.                                                      |
-| The list index is always -1                | `useListItem`'s `ref` is not attached, or `FloatingList` is not an ancestor.  |
-| Typeahead matches nothing                  | `labelsRef` is not passed to `FloatingList`, or `useListItem` has no `label`. |
-| Screen readers announce nothing useful     | `useRole` is missing, or the wrong `role` was chosen.                         |
-| Focus escapes a modal                      | `FloatingFocusManager` is missing or has `modal={false}`.                     |
-| The exit animation never plays             | The element is unmounted on `open()` instead of on `transition.isMounted`.    |
+| Symptom                                    | Cause                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Nothing updates when a signal changes      | An option was passed as a value instead of a getter, or destructured.                               |
+| The element is clipped or behind something | It needs `FloatingPortal`.                                                                          |
+| It never moves while scrolling             | `whileElementsMounted: autoUpdate` is missing.                                                      |
+| Escape or an outside click does nothing    | `useDismiss` is missing.                                                                            |
+| The list index is always -1                | `useListItem`'s `ref` is not attached, or `FloatingList` is not an ancestor.                        |
+| Typeahead matches nothing                  | `onLabelsChange` is not passed to `FloatingList`, or the signal it fills is not passed as `labels`. |
+| Screen readers announce nothing useful     | `useRole` is missing, or the wrong `role` was chosen.                                               |
+| Focus escapes a modal                      | `FloatingFocusManager` is missing or has `modal={false}`.                                           |
+| The exit animation never plays             | The element is unmounted on `open()` instead of on `transition.isMounted`.                          |

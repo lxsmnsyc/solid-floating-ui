@@ -1,6 +1,5 @@
 import {
   FloatingList,
-  createRef,
   useClick,
   useDismiss,
   useFloating,
@@ -19,8 +18,8 @@ export default function ListNavigationCase(): JSX.Element {
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
   const [selected, setSelected] = createSignal<string>('');
 
-  const elementsRef = createRef<(HTMLElement | null)[]>([]);
-  const labelsRef = createRef<(string | null)[]>([]);
+  const [elements, setElements] = createSignal<(HTMLElement | null)[]>([]);
+  const [labels, setLabels] = createSignal<(string | null)[]>([]);
 
   const floating = useFloating({
     get open() {
@@ -37,7 +36,7 @@ export default function ListNavigationCase(): JSX.Element {
     useDismiss(floating.context),
     useRole(floating.context, { role: 'listbox' }),
     useListNavigation(floating.context, {
-      listRef: () => elementsRef.current,
+      items: elements,
       get activeIndex() {
         return activeIndex();
       },
@@ -47,7 +46,7 @@ export default function ListNavigationCase(): JSX.Element {
       loop: true,
     }),
     useTypeahead(floating.context, {
-      listRef: () => labelsRef.current,
+      labels,
       get activeIndex() {
         return activeIndex();
       },
@@ -79,7 +78,14 @@ export default function ListNavigationCase(): JSX.Element {
           class="menu"
           data-testid="menu"
         >
-          <FloatingList elementsRef={elementsRef} labelsRef={labelsRef}>
+          <FloatingList
+            onElementsChange={(value) => {
+              setElements(value);
+            }}
+            onLabelsChange={(value) => {
+              setLabels(value);
+            }}
+          >
             <For each={ITEMS}>
               {(item) => (
                 <Item

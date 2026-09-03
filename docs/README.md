@@ -6,8 +6,7 @@ surface as [`@floating-ui/react`](https://floating-ui.com/docs/react).
 Start here:
 
 - [Getting started](getting-started.md) — install, first tooltip, mental model
-- [Reactivity](reactivity.md) — how options and return values are read, and
-  where refs still exist
+- [Reactivity](reactivity.md) — how options and return values are read
 - [Migrating from `@floating-ui/react`](migrating-from-react.md) — the complete
   list of differences
 
@@ -22,7 +21,7 @@ Reference:
   the delay groups and `Composite`
 - [Transitions](transitions.md) — `useTransitionStatus` and
   `useTransitionStyles`
-- [Utilities](utilities.md) — `createRef`, `useId`, `useMergeRefs` and the
+- [Utilities](utilities.md) — `useId`, `useMergeRefs` and the
   `solid-floating-ui/utils` entry point
 
 Patterns:

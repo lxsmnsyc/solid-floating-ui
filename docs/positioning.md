@@ -96,24 +96,25 @@ useFloating({
 
 ### `arrow`
 
-This package wraps the core `arrow` middleware so that `element` accepts a
-`Ref` as well as an element. Nothing happens until the ref is filled, so the
-middleware is safe to declare before the arrow renders.
+This package wraps the core `arrow` middleware so that `element` accepts an
+accessor as well as an element. The middleware does nothing until the accessor
+returns a node, so it is safe to declare before the arrow renders.
 
 ```js
-import { arrow, createRef } from 'solid-floating-ui';
+import { arrow, useFloating } from 'solid-floating-ui';
+import { createSignal } from 'solid-js';
 
-const arrowRef = createRef(null);
+const [arrowElement, setArrowElement] = createSignal(null);
 
 useFloating({
-  middleware: [arrow({ element: arrowRef, padding: 4 })],
+  middleware: [arrow({ element: arrowElement, padding: 4 })],
 });
 ```
 
-| Option    | Type                                      | Default | Description                                                       |
-| --------- | ----------------------------------------- | ------- | ----------------------------------------------------------------- |
-| `element` | `Ref<Element \| null> \| Element \| null` |         | The arrow element, or a ref holding it.                           |
-| `padding` | `Padding`                                 | `0`     | Space to keep between the arrow and the floating element's edges. |
+| Option    | Type                                         | Default | Description                                                       |
+| --------- | -------------------------------------------- | ------- | ----------------------------------------------------------------- |
+| `element` | `(() => Element \| null) \| Element \| null` |         | The arrow element, or an accessor returning it.                   |
+| `padding` | `Padding`                                    | `0`     | Space to keep between the arrow and the floating element's edges. |
 
 See [`FloatingArrow`](components.md#floatingarrow) for a component that draws
 the arrow and consumes this data for you.

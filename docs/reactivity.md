@@ -95,14 +95,14 @@ User props merge in the same call, and your handler runs before the library's:
 />
 ```
 
-## Reading is an accessor, writing is a ref
+## Values you supply are accessors, values the library produces are callbacks
 
-Anywhere the library only reads a value you supply, the option takes an
-accessor, `() => T`:
+Anywhere the library reads something you own, the option is an accessor,
+`() => T`:
 
 ```jsx
 useListNavigation(floating.context, {
-  listRef: () => items(),
+  items: () => items(),
   /* ... */
 });
 
@@ -111,38 +111,62 @@ arrow({ element: arrowElement });
 <FloatingFocusManager context={floating.context} initialFocus={() => confirmButton()}>
 ```
 
-The read-only positions are `listRef` on `useListNavigation`, `useTypeahead`
-and `inner`, `scrollRef` on `inner` and `useInnerOffset`, `element` on `arrow`,
-`root` on `FloatingPortal`, and `initialFocus` and `returnFocus` on
-`FloatingFocusManager`.
+The accessor positions are `items` on `useListNavigation` and `inner`, `labels`
+on `useTypeahead`, `scrollElement` on `inner` and `useInnerOffset`, `overflow`
+on `useInnerOffset`, `element` on `arrow`, `root` on `FloatingPortal`, and
+`initialFocus` and `returnFocus` on `FloatingFocusManager`.
 
-A `Ref` object survives only where the library writes into a container for you.
-You create one with `createRef`:
-
-```jsx
-import { createRef } from 'solid-floating-ui';
-
-const elementsRef = createRef([]);
-const labelsRef = createRef([]);
-```
-
-`createRef(value)` returns `{ current: value }`, nothing more. It is not
-reactive, and writing to `.current` does not schedule an update. The positions
-that take one are `elementsRef` and `labelsRef` on `FloatingList`,
-`virtualItemRef` on `useListNavigation`, and `overflowRef` on `inner` and
-`useInnerOffset`.
-
-The two meet when `FloatingList` collects the items that `useListNavigation`
-then reads, and the accessor spans the gap:
+Anywhere the library produces something for you, it hands it back through a
+callback, the way `onOpenChange` already does:
 
 ```jsx
-const elementsRef = createRef([]);
+const [items, setItems] = createSignal([]);
+const [labels, setLabels] = createSignal([]);
 
-useListNavigation(floating.context, {
-  listRef: () => elementsRef.current,
-  /* ... */
-});
+<FloatingList
+  onElementsChange={(value) => {
+    setItems(value);
+  }}
+  onLabelsChange={(value) => {
+    setLabels(value);
+  }}
+>
+  {/* items */}
+</FloatingList>;
 ```
+
+The callback positions are `onElementsChange` and `onLabelsChange` on
+`FloatingList`, `onVirtualItemChange` on `useListNavigation`, and
+`onOverflowChange` on `inner`.
+
+There is no ref container anywhere in the API. State you own lives in a signal,
+which is what SolidJS already gives you, and the two halves meet through it:
+
+```jsx
+const [items, setItems] = createSignal([]);
+
+useListNavigation(floating.context, { items /* ... */ });
+
+<FloatingList
+  onElementsChange={(value) => {
+    setItems(value);
+  }}
+>
+  {/* ... */}
+</FloatingList>;
+```
+
+## Mutable state that is not reactive
+
+Two things are deliberately plain objects rather than signals, because writing
+to them must not re-run anything:
+
+- `context.data`, the state the hooks attached to one floating element share,
+  such as `data.openEvent`.
+- The bookkeeping inside a delay group.
+
+Read them where you need the current value, not inside a memo expecting an
+update.
 
 ## Effects run at render time
 

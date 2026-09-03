@@ -5,11 +5,10 @@ import { clearTimeoutIfSet } from '../utils/schedule';
 
 export interface UseTypeaheadProps {
   /**
-   * A ref which contains an array of strings whose indices match the HTML
-   * elements of the list.
+   * Reads the item labels, in the same order as the elements.
    * @default empty list
    */
-  listRef: () => (string | null)[];
+  labels: () => (string | null)[];
   /**
    * The index of the active (focused or highlighted) item in the list.
    * @default null
@@ -57,7 +56,6 @@ export interface UseTypeaheadProps {
 /**
  * Provides a matching callback that can be used to focus an item as the user
  * types, often used in tandem with `useListNavigation()`.
- * @see https://floating-ui.com/docs/useTypeahead
  */
 export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadProps): ElementProps {
   const enabled = (): boolean => props.enabled !== false;
@@ -87,8 +85,8 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
   });
 
   function setTypingChange(value: boolean): void {
-    if (context.dataRef.current.typing !== value) {
-      context.dataRef.current.typing = value;
+    if (context.data.typing !== value) {
+      context.data.typing = value;
       props.onTypingChange?.(value);
     }
   }
@@ -109,7 +107,7 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
       return str ? list.indexOf(str) : -1;
     }
 
-    const listContent = props.listRef();
+    const listContent = props.labels();
 
     if (typedString.length > 0 && typedString[0] !== ' ') {
       if (getMatchingIndex(listContent, listContent, typedString) === -1) {

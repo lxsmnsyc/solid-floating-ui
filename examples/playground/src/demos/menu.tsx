@@ -5,7 +5,6 @@ import {
   FloatingPortal,
   FloatingTree,
   autoUpdate,
-  createRef,
   flip,
   offset,
   safePolygon,
@@ -46,6 +45,8 @@ export function MenuItem(props: { label: string; onSelect?: () => void }): JSX.E
   return (
     <div
       class="option"
+      role="menuitem"
+      tabindex={-1}
       data-active={isActive()}
       {...menu?.getItemProps({
         active: isActive(),
@@ -71,8 +72,8 @@ export function Menu(props: { label: string; children: JSX.Element }): JSX.Eleme
   const [open, setOpen] = createSignal(false);
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
 
-  const elementsRef = createRef<(HTMLElement | null)[]>([]);
-  const labelsRef = createRef<(string | null)[]>([]);
+  const [elements, setElements] = createSignal<(HTMLElement | null)[]>([]);
+  const [labels, setLabels] = createSignal<(string | null)[]>([]);
 
   const parent = useContext(MenuContext);
   const listItem = useListItem({
@@ -117,7 +118,7 @@ export function Menu(props: { label: string; children: JSX.Element }): JSX.Eleme
     useDismiss(floating.context, { bubbles: true }),
     useRole(floating.context, { role: 'menu' }),
     useListNavigation(floating.context, {
-      listRef: () => elementsRef.current,
+      items: elements,
       get activeIndex() {
         return activeIndex();
       },
@@ -130,7 +131,7 @@ export function Menu(props: { label: string; children: JSX.Element }): JSX.Eleme
       loop: true,
     }),
     useTypeahead(floating.context, {
-      listRef: () => labelsRef.current,
+      labels,
       get activeIndex() {
         return activeIndex();
       },
@@ -173,6 +174,8 @@ export function Menu(props: { label: string; children: JSX.Element }): JSX.Eleme
       >
         <div
           class="option"
+          role="menuitem"
+          tabindex={-1}
           data-active={isActiveItem()}
           {...interactions.getReferenceProps(
             parent?.getItemProps({ active: isActiveItem() }) ?? {},
@@ -204,7 +207,14 @@ export function Menu(props: { label: string; children: JSX.Element }): JSX.Eleme
               style={floating.floatingStyles}
             >
               <MenuContext.Provider value={context}>
-                <FloatingList elementsRef={elementsRef} labelsRef={labelsRef}>
+                <FloatingList
+                  onElementsChange={(value) => {
+                    setElements(value);
+                  }}
+                  onLabelsChange={(value) => {
+                    setLabels(value);
+                  }}
+                >
                   {props.children}
                 </FloatingList>
               </MenuContext.Provider>

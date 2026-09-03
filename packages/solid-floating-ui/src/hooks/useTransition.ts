@@ -73,7 +73,6 @@ export interface UseTransitionStatusReturn {
 /**
  * Provides a status string to apply CSS transitions to a floating element,
  * correctly handling placement-aware transitions.
- * @see https://floating-ui.com/docs/useTransition#usetransitionstatus
  */
 export function useTransitionStatus(
   context: FloatingContext,
@@ -162,7 +161,6 @@ export interface UseTransitionStylesReturn {
 /**
  * Provides styles to apply CSS transitions to a floating element, correctly
  * handling placement-aware transitions. Wrapper around `useTransitionStatus`.
- * @see https://floating-ui.com/docs/useTransition#usetransitionstyles
  */
 export function useTransitionStyles<RT extends ReferenceType = ReferenceType>(
   context: FloatingContext<RT>,

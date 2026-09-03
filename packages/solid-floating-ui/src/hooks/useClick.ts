@@ -57,7 +57,6 @@ export interface UseClickProps {
 
 /**
  * Opens or closes the floating element when clicking the reference element.
- * @see https://floating-ui.com/docs/useClick
  */
 export function useClick(context: FloatingRootContext, props: UseClickProps = {}): ElementProps {
   const eventOption = (): 'click' | 'mousedown' => props.event ?? 'click';
@@ -89,8 +88,8 @@ export function useClick(context: FloatingRootContext, props: UseClickProps = {}
       if (
         context.open &&
         toggle() &&
-        (context.dataRef.current.openEvent && stickIfOpen()
-          ? context.dataRef.current.openEvent.type === 'mousedown'
+        (context.data.openEvent && stickIfOpen()
+          ? context.data.openEvent.type === 'mousedown'
           : true)
       ) {
         context.onOpenChange(false, event, 'click');
@@ -113,9 +112,7 @@ export function useClick(context: FloatingRootContext, props: UseClickProps = {}
       if (
         context.open &&
         toggle() &&
-        (context.dataRef.current.openEvent && stickIfOpen()
-          ? context.dataRef.current.openEvent.type === 'click'
-          : true)
+        (context.data.openEvent && stickIfOpen() ? context.data.openEvent.type === 'click' : true)
       ) {
         context.onOpenChange(false, event, 'click');
       } else {

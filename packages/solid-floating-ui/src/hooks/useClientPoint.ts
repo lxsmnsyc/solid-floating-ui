@@ -4,11 +4,10 @@ import type { AnyElementProps, ContextData, ElementProps, FloatingRootContext } 
 import { contains, getTarget } from '../utils/element';
 import { isMouseLikePointerType } from '../utils/event';
 import { createCleanupEffect } from '../utils/reactivity';
-import type { Ref } from '../utils/ref';
 
 interface VirtualElementData {
   axis: 'x' | 'y' | 'both';
-  dataRef: Ref<ContextData>;
+  contextData: ContextData;
   pointerType: string | undefined;
   x: number | null;
   y: number | null;
@@ -35,7 +34,7 @@ function createVirtualElement(
       const isXAxis = data.axis === 'x' || data.axis === 'both';
       const isYAxis = data.axis === 'y' || data.axis === 'both';
       const canTrackCursorOnAutoUpdate =
-        ['mouseenter', 'mousemove'].includes(data.dataRef.current.openEvent?.type ?? '') &&
+        ['mouseenter', 'mousemove'].includes(data.contextData.openEvent?.type ?? '') &&
         data.pointerType !== 'touch';
 
       let x = domRect.x;
@@ -118,7 +117,6 @@ export interface UseClientPointProps {
 /**
  * Positions the floating element relative to a client point (in the viewport),
  * such as the mouse position. By default, it follows the mouse cursor.
- * @see https://floating-ui.com/docs/useClientPoint
  */
 export function useClientPoint(
   context: FloatingRootContext,
@@ -145,10 +143,7 @@ export function useClientPoint(
     // Prevent setting if the open event was not a mouse-like one (for example
     // focus to open, then hover over the reference element). Only apply if the
     // event exists.
-    if (
-      context.dataRef.current.openEvent &&
-      !isMouseBasedEvent(context.dataRef.current.openEvent)
-    ) {
+    if (context.data.openEvent && !isMouseBasedEvent(context.data.openEvent)) {
       return;
     }
 
@@ -157,7 +152,7 @@ export function useClientPoint(
         x: nextX,
         y: nextY,
         axis: axis(),
-        dataRef: context.dataRef,
+        contextData: context.data,
         pointerType: pointerType(),
       }),
     );
@@ -207,10 +202,7 @@ export function useClientPoint(
       }
     }
 
-    if (
-      !context.dataRef.current.openEvent ||
-      isMouseBasedEvent(context.dataRef.current.openEvent)
-    ) {
+    if (!context.data.openEvent || isMouseBasedEvent(context.data.openEvent)) {
       win.addEventListener('mousemove', handleMouseMove);
       const cleanup = (): void => {
         win.removeEventListener('mousemove', handleMouseMove);

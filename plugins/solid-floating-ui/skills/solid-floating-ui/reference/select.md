@@ -10,7 +10,6 @@ import {
   FloatingPortal,
   type UseInteractionsReturn,
   autoUpdate,
-  createRef,
   flip,
   offset,
   shift,
@@ -46,12 +45,21 @@ function Option(props: OptionProps): JSX.Element {
   return (
     <div
       class="option"
+      role="option"
+      tabindex={-1}
+      aria-selected={listItem.index === props.selectedIndex}
       data-active={isActive()}
       {...props.getItemProps({
         active: isActive(),
         selected: listItem.index === props.selectedIndex,
         onClick: () => {
           props.onSelect(listItem.index);
+        },
+        onKeyDown: (event: KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            props.onSelect(listItem.index);
+          }
         },
       })}
       ref={(element) => {
@@ -74,8 +82,8 @@ export function Select(props: SelectProps): JSX.Element {
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
   const [selectedIndex, setSelectedIndex] = createSignal<number | null>(null);
 
-  const elementsRef = createRef<(HTMLElement | null)[]>([]);
-  const labelsRef = createRef<(string | null)[]>([]);
+  const [items, setItems] = createSignal<(HTMLElement | null)[]>([]);
+  const [labels, setLabels] = createSignal<(string | null)[]>([]);
 
   const floating = useFloating({
     get open() {
@@ -103,7 +111,7 @@ export function Select(props: SelectProps): JSX.Element {
     useDismiss(floating.context),
     useRole(floating.context, { role: 'listbox' }),
     useListNavigation(floating.context, {
-      listRef: () => elementsRef.current,
+      items,
       get activeIndex() {
         return activeIndex();
       },
@@ -116,7 +124,7 @@ export function Select(props: SelectProps): JSX.Element {
       loop: true,
     }),
     useTypeahead(floating.context, {
-      listRef: () => labelsRef.current,
+      labels,
       get activeIndex() {
         return activeIndex();
       },
@@ -166,7 +174,14 @@ export function Select(props: SelectProps): JSX.Element {
               }}
               style={floating.floatingStyles}
             >
-              <FloatingList elementsRef={elementsRef} labelsRef={labelsRef}>
+              <FloatingList
+                onElementsChange={(value) => {
+                  setItems(value);
+                }}
+                onLabelsChange={(value) => {
+                  setLabels(value);
+                }}
+              >
                 <For each={props.options}>
                   {(option) => (
                     <Option
@@ -190,11 +205,15 @@ export function Select(props: SelectProps): JSX.Element {
 
 ## Notes
 
-- `elementsRef` and `labelsRef` are `createRef` containers because
-  `FloatingList` writes into them. The navigation hooks read them back through
-  an accessor, `() => elementsRef.current`.
+- `FloatingList` reports the items it collects through `onElementsChange` and
+  `onLabelsChange`. The signals they fill go straight to `useListNavigation`'s
+  `items` and `useTypeahead`'s `labels`.
 - `useListItem` returns `-1` until the item registers, which is why `isActive`
   compares against a signal rather than caching the index.
+- The item must carry `tabindex={-1}`, otherwise `useListNavigation` cannot
+  move DOM focus onto it and the arrow keys appear to do nothing.
+- List navigation moves focus, it does not activate. The item needs its own
+  Enter and Space handling, as above.
 - `selectedIndex` on both hooks is what makes reopening land on the current
   value and typeahead start from it.
 - The `size()` middleware matches the menu width to the trigger. Add

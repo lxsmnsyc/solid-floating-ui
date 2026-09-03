@@ -135,8 +135,8 @@ function Select(props) {
   const [activeIndex, setActiveIndex] = createSignal(null);
   const [selectedIndex, setSelectedIndex] = createSignal(null);
 
-  const elementsRef = createRef([]);
-  const labelsRef = createRef([]);
+  const [items, setItems] = createSignal([]);
+  const [labels, setLabels] = createSignal([]);
 
   const floating = useFloating({
     get open() {
@@ -155,7 +155,7 @@ function Select(props) {
     useDismiss(floating.context),
     useRole(floating.context, { role: 'listbox' }),
     useListNavigation(floating.context, {
-      listRef: () => elementsRef.current,
+      items,
       get activeIndex() {
         return activeIndex();
       },
@@ -166,7 +166,7 @@ function Select(props) {
       loop: true,
     }),
     useTypeahead(floating.context, {
-      listRef: () => labelsRef.current,
+      labels,
       get activeIndex() {
         return activeIndex();
       },
@@ -190,7 +190,7 @@ function Select(props) {
           floating.refs.setReference(element);
         }}
       >
-        {labelsRef.current[selectedIndex() ?? -1] ?? 'Select'}
+        {props.options[selectedIndex() ?? -1] ?? 'Select'}
       </button>
       <Show when={open()}>
         <FloatingPortal>
@@ -203,7 +203,14 @@ function Select(props) {
               style={floating.floatingStyles}
               class="menu"
             >
-              <FloatingList elementsRef={elementsRef} labelsRef={labelsRef}>
+              <FloatingList
+                onElementsChange={(value) => {
+                  setItems(value);
+                }}
+                onLabelsChange={(value) => {
+                  setLabels(value);
+                }}
+              >
                 <For each={props.options}>
                   {(option) => (
                     <Option
@@ -235,6 +242,8 @@ function Option(props) {
 
   return (
     <div
+      role="option"
+      tabindex={-1}
       {...props.getItemProps({
         active: isActive(),
         selected: listItem.index === props.selectedIndex,

@@ -36,7 +36,6 @@ export interface UseFocusProps {
 /**
  * Opens the floating element while the reference element has focus, like CSS
  * `:focus`.
- * @see https://floating-ui.com/docs/useFocus
  */
 export function useFocus(context: FloatingRootContext, props: UseFocusProps = {}): ElementProps {
   const enabled = (): boolean => props.enabled !== false;
@@ -170,7 +169,7 @@ export function useFocus(context: FloatingRootContext, props: UseFocusProps = {}
         // and not the element that actually received focus if it is located
         // inside a shadow root.
         if (
-          contains(context.dataRef.current.floatingContext?.refs.floating.current, activeEl) ||
+          contains(context.data.floatingContext?.elements.floating, activeEl) ||
           contains(domReference, activeEl) ||
           movedToFocusGuard
         ) {

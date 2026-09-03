@@ -82,7 +82,6 @@ export interface SafePolygonOptions {
 /**
  * Generates a safe polygon area that the user can traverse without closing the
  * floating element once leaving the reference element.
- * @see https://floating-ui.com/docs/useHover#safepolygon
  */
 export function safePolygon(options: SafePolygonOptions = {}): HandleClose {
   const { buffer = 0.5, blockPointerEvents = false, requireIntent = true } = options;
@@ -178,7 +177,7 @@ export function safePolygon(options: SafePolygonOptions = {}): HandleClose {
       }
 
       // If any nested child is open, abort.
-      if (tree && getNodeChildren(tree.nodesRef.current, nodeId).length) {
+      if (tree && getNodeChildren(tree.nodes(), nodeId).length) {
         return;
       }
 

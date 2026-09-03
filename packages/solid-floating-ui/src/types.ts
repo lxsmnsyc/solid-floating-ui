@@ -9,7 +9,6 @@ import type {
 } from '@floating-ui/dom';
 import type { JSX } from 'solid-js';
 import type { ExtendedUserProps } from './hooks/useInteractions';
-import type { Ref } from './utils/ref';
 
 export type ReferenceType = Element | VirtualElement;
 
@@ -94,10 +93,11 @@ export interface ContextData {
   insideTree?: boolean | undefined;
 }
 
+/**
+ * The setters that attach the elements. Read the elements back through
+ * `elements`, which is reactive.
+ */
 export interface ExtendedRefs<RT extends ReferenceType = ReferenceType> {
-  reference: Ref<ReferenceType | null>;
-  floating: Ref<HTMLElement | null>;
-  domReference: Ref<Element | null>;
   setReference(node: RT | null): void;
   setFloating(node: HTMLElement | null): void;
   setPositionReference(node: ReferenceType | null): void;
@@ -114,7 +114,11 @@ export interface ExtendedElements<RT extends ReferenceType = ReferenceType> {
 }
 
 export interface FloatingRootContext<RT extends ReferenceType = ReferenceType> {
-  dataRef: Ref<ContextData>;
+  /**
+   * State the hooks attached to this floating element share. Mutated in place,
+   * so reads are not reactive.
+   */
+  data: ContextData;
   readonly open: boolean;
   onOpenChange(open: boolean, event?: Event, reason?: OpenChangeReason): void;
   readonly elements: {
@@ -150,8 +154,6 @@ export interface UsePositionReturn<
    */
   readonly floatingStyles: JSX.CSSProperties;
   refs: {
-    reference: Ref<RT | null>;
-    floating: Ref<HTMLElement | null>;
     setReference(node: RT | null): void;
     setFloating(node: HTMLElement | null): void;
   };
@@ -167,7 +169,7 @@ export interface FloatingContext<RT extends ReferenceType = ReferenceType> exten
   readonly open: boolean;
   onOpenChange(open: boolean, event?: Event, reason?: OpenChangeReason): void;
   events: FloatingEvents;
-  dataRef: Ref<ContextData>;
+  data: ContextData;
   nodeId: string | undefined;
   floatingId: string;
   refs: ExtendedRefs<RT>;
@@ -245,7 +247,11 @@ export interface FloatingNodeType<RT extends ReferenceType = ReferenceType> {
 }
 
 export interface FloatingTreeType<RT extends ReferenceType = ReferenceType> {
-  nodesRef: Ref<FloatingNodeType<RT>[]>;
+  /**
+   * The registered nodes. Reactive: reading it inside a tracking scope
+   * subscribes to the tree changing.
+   */
+  nodes(): FloatingNodeType<RT>[];
   events: FloatingEvents;
   addNode(node: FloatingNodeType): void;
   removeNode(node: FloatingNodeType): void;

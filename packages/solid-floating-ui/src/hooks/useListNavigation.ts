@@ -5,7 +5,7 @@ import { useFloatingParentNodeId, useFloatingTree } from '../components/Floating
 import type { AnyElementProps, ElementProps, FloatingRootContext } from '../types';
 import {
   type DisabledIndices,
-  type ListRef,
+  type ListItems,
   createGridCellMap,
   findNonDisabledListIndex,
   getGridCellIndexOfCorner,
@@ -29,7 +29,6 @@ import { isVirtualClick, isVirtualPointerEvent, stopEvent } from '../utils/event
 import { warn } from '../utils/log';
 import { getDeepestNode } from '../utils/nodes';
 import { createCleanupEffect, lazyProps } from '../utils/reactivity';
-import type { Ref } from '../utils/ref';
 
 export const ESCAPE = 'Escape';
 
@@ -114,10 +113,10 @@ function isCrossOrientationCloseKey(
 
 export interface UseListNavigationProps {
   /**
-   * A ref that holds an array of list items.
+   * Reads the list items, in index order.
    * @default empty list
    */
-  listRef: ListRef;
+  items: ListItems;
   /**
    * The index of the currently active (focused or highlighted) item, which may
    * or may not be selected.
@@ -223,10 +222,10 @@ export interface UseListNavigationProps {
    */
   scrollItemIntoView?: boolean | ScrollIntoViewOptions | undefined;
   /**
-   * When using virtual focus management, this holds a ref to the
-   * virtually-focused item. Requires `FloatingTree` to be set up.
+   * Called with the virtually-focused item when virtual focus management is in
+   * use. Requires `FloatingTree` to be set up.
    */
-  virtualItemRef?: Ref<HTMLElement | null> | undefined;
+  onVirtualItemChange?: ((item: HTMLElement | null) => void) | undefined;
   /**
    * Only for `cols > 1`, specify sizes for grid items.
    * `{ width: 2, height: 2 }` means an item is 2 columns wide and 2 rows tall.
@@ -243,7 +242,6 @@ export interface UseListNavigationProps {
 /**
  * Adds arrow key-based navigation of a list of items, either using real DOM
  * focus or virtual focus.
- * @see https://floating-ui.com/docs/useListNavigation
  */
 export function useListNavigation(
   context: FloatingRootContext,
@@ -291,7 +289,7 @@ export function useListNavigation(
   const tree = useFloatingTree();
 
   createRenderEffect(() => {
-    context.dataRef.current.orientation = orientation();
+    context.data.orientation = orientation();
   });
 
   const typeableComboboxReference = (): boolean =>
@@ -318,7 +316,7 @@ export function useListNavigation(
   let previousOnNavigate = onNavigate;
 
   function focusItem(): void {
-    const listRef = props.listRef;
+    const items = props.items;
 
     function runFocus(item: HTMLElement): void {
       if (virtual()) {
@@ -327,9 +325,7 @@ export function useListNavigation(
         }
         setActiveId(item.id);
         tree?.events.emit('virtualfocus', item);
-        if (props.virtualItemRef) {
-          props.virtualItemRef.current = item;
-        }
+        props.onVirtualItemChange?.(item);
       } else {
         enqueueFocus(item, {
           sync: forceSyncFocus,
@@ -338,7 +334,7 @@ export function useListNavigation(
       }
     }
 
-    const initialItem = listRef()[index];
+    const initialItem = items()[index];
     const shouldForceScrollIntoView = forceScrollIntoView;
 
     if (initialItem) {
@@ -352,7 +348,7 @@ export function useListNavigation(
       : requestAnimationFrame;
 
     scheduler(() => {
-      const waitedItem = listRef()[index] ?? initialItem;
+      const waitedItem = items()[index] ?? initialItem;
 
       if (!waitedItem) {
         return;
@@ -438,7 +434,7 @@ export function useListNavigation(
       ) {
         let runs = 0;
         const waitForListPopulated = (): void => {
-          if (props.listRef()[0] == null) {
+          if (props.items()[0] == null) {
             // Avoid letting the browser paint if possible on the first try,
             // otherwise use rAF. Don't try more than twice, since something
             // is wrong otherwise.
@@ -450,8 +446,8 @@ export function useListNavigation(
           } else {
             index =
               key == null || isMainOrientationToEndKey(key, orientation(), rtl()) || nested()
-                ? getMinListIndex(props.listRef, props.disabledIndices)
-                : getMaxListIndex(props.listRef, props.disabledIndices);
+                ? getMinListIndex(props.items, props.disabledIndices)
+                : getMaxListIndex(props.items, props.disabledIndices);
             key = null;
             onNavigate();
           }
@@ -459,7 +455,7 @@ export function useListNavigation(
 
         waitForListPopulated();
       }
-    } else if (!isIndexOutOfListBounds(props.listRef, activeIndex)) {
+    } else if (!isIndexOutOfListBounds(props.items, activeIndex)) {
       index = activeIndex;
       focusItem();
       forceScrollIntoView = false;
@@ -473,7 +469,7 @@ export function useListNavigation(
       return;
     }
 
-    const nodes = tree.nodesRef.current;
+    const nodes = tree.nodes();
     const parent = nodes.find((node) => node.id === parentId)?.context?.elements.floating;
     const activeEl = activeElement(getDocument(context.elements.floating));
     const treeContainsActiveEl = nodes.some(
@@ -502,9 +498,7 @@ export function useListNavigation(
     function handleVirtualFocus(item: HTMLElement): void {
       setVirtualId(item.id);
 
-      if (props.virtualItemRef) {
-        props.virtualItemRef.current = item;
-      }
+      props.onVirtualItemChange?.(item);
     }
 
     tree.events.on('virtualfocus', handleVirtualFocus);
@@ -532,7 +526,7 @@ export function useListNavigation(
     if (!context.open) {
       return;
     }
-    const nextIndex = props.listRef().indexOf(currentTarget);
+    const nextIndex = props.items().indexOf(currentTarget);
     if (nextIndex !== -1 && index !== nextIndex) {
       index = nextIndex;
       onNavigate();
@@ -578,8 +572,7 @@ export function useListNavigation(
   function getParentOrientation(): Orientation | undefined {
     return (
       props.parentOrientation ??
-      tree?.nodesRef.current.find((node) => node.id === parentId)?.context?.dataRef.current
-        .orientation
+      tree?.nodes().find((node) => node.id === parentId)?.context?.data.orientation
     );
   }
 
@@ -599,7 +592,7 @@ export function useListNavigation(
       return;
     }
 
-    const listRef = props.listRef;
+    const items = props.items;
     const disabledIndices = props.disabledIndices;
     const currentOrientation = orientation();
     const currentRtl = rtl();
@@ -629,8 +622,8 @@ export function useListNavigation(
     }
 
     const currentIndex = index;
-    const minIndex = getMinListIndex(listRef, disabledIndices);
-    const maxIndex = getMaxListIndex(listRef, disabledIndices);
+    const minIndex = getMinListIndex(items, disabledIndices);
+    const maxIndex = getMaxListIndex(items, disabledIndices);
 
     if (!typeableComboboxReference()) {
       if (event.key === 'Home') {
@@ -650,7 +643,7 @@ export function useListNavigation(
     if (currentCols > 1) {
       const sizes =
         props.itemSizes ??
-        Array.from({ length: listRef().length }, () => ({
+        Array.from({ length: items().length }, () => ({
           width: 1,
           height: 1,
         }));
@@ -660,13 +653,12 @@ export function useListNavigation(
       const explicitDisabledIndices =
         typeof disabledIndices === 'function' ? undefined : disabledIndices;
       const minGridIndex = cellMap.findIndex(
-        (cellIndex) =>
-          cellIndex != null && !isListIndexDisabled(listRef, cellIndex, disabledIndices),
+        (cellIndex) => cellIndex != null && !isListIndexDisabled(items, cellIndex, disabledIndices),
       );
       // Last enabled index.
       const maxGridIndex = cellMap.reduce(
         (foundIndex: number, cellItemIndex, cellIndex) =>
-          cellItemIndex != null && !isListIndexDisabled(listRef, cellItemIndex, disabledIndices)
+          cellItemIndex != null && !isListIndexDisabled(items, cellItemIndex, disabledIndices)
             ? cellIndex
             : foundIndex,
         -1,
@@ -675,7 +667,7 @@ export function useListNavigation(
       const nextIndex =
         cellMap[
           getGridNavigatedIndex(
-            () => cellMap.map((itemIndex) => (itemIndex == null ? null : listRef()[itemIndex]!)),
+            () => cellMap.map((itemIndex) => (itemIndex == null ? null : items()[itemIndex]!)),
             {
               event,
               orientation: currentOrientation,
@@ -687,8 +679,8 @@ export function useListNavigation(
               disabledIndices: getGridCellIndices(
                 [
                   ...(explicitDisabledIndices ??
-                    listRef().map((_, itemIndex) =>
-                      isListIndexDisabled(listRef, itemIndex, disabledIndices)
+                    items().map((_, itemIndex) =>
+                      isListIndexDisabled(items, itemIndex, disabledIndices)
                         ? itemIndex
                         : undefined,
                     )),
@@ -744,11 +736,11 @@ export function useListNavigation(
       if (isMainOrientationToEndKey(event.key, currentOrientation, currentRtl)) {
         if (loop()) {
           if (currentIndex < maxIndex) {
-            index = findNonDisabledListIndex(listRef, {
+            index = findNonDisabledListIndex(items, {
               startingIndex: currentIndex,
               disabledIndices,
             });
-          } else if (allowEscape() && currentIndex !== listRef().length) {
+          } else if (allowEscape() && currentIndex !== items().length) {
             // Escaping the list leaves nothing selected.
             index = -1;
           } else {
@@ -757,7 +749,7 @@ export function useListNavigation(
         } else {
           index = Math.min(
             maxIndex,
-            findNonDisabledListIndex(listRef, {
+            findNonDisabledListIndex(items, {
               startingIndex: currentIndex,
               disabledIndices,
             }),
@@ -765,21 +757,21 @@ export function useListNavigation(
         }
       } else if (loop()) {
         if (currentIndex > minIndex) {
-          index = findNonDisabledListIndex(listRef, {
+          index = findNonDisabledListIndex(items, {
             startingIndex: currentIndex,
             decrement: true,
             disabledIndices,
           });
         } else if (allowEscape() && currentIndex !== -1) {
           // Escaping past the start parks the index beyond the last item.
-          index = listRef().length;
+          index = items().length;
         } else {
           index = maxIndex;
         }
       } else {
         index = Math.max(
           minIndex,
-          findNonDisabledListIndex(listRef, {
+          findNonDisabledListIndex(items, {
             startingIndex: currentIndex,
             decrement: true,
             disabledIndices,
@@ -787,7 +779,7 @@ export function useListNavigation(
         );
       }
 
-      if (isIndexOutOfListBounds(listRef, index)) {
+      if (isIndexOutOfListBounds(items, index)) {
         index = -1;
       }
 
@@ -833,7 +825,7 @@ export function useListNavigation(
       onKeyDown(event: KeyboardEvent) {
         isPointerModality = false;
 
-        const listRef = props.listRef;
+        const items = props.items;
         const currentOrientation = orientation();
         const currentRtl = rtl();
         const isArrowKey = event.key.startsWith('Arrow');
@@ -856,11 +848,10 @@ export function useListNavigation(
         const isNavigationKey = (nested() ? isParentCrossOpenKey : isMainKey) || isSelectionKey;
 
         if (virtual() && context.open) {
-          const rootNode = tree?.nodesRef.current.find((node) => node.parentId == null);
-          const deepestNode =
-            tree && rootNode ? getDeepestNode(tree.nodesRef.current, rootNode.id) : null;
+          const rootNode = tree?.nodes().find((node) => node.parentId == null);
+          const deepestNode = tree && rootNode ? getDeepestNode(tree.nodes(), rootNode.id) : null;
 
-          if (isMoveKey && deepestNode && props.virtualItemRef) {
+          if (isMoveKey && deepestNode && props.onVirtualItemChange) {
             const eventObject = new KeyboardEvent('keydown', {
               key: event.key,
               bubbles: true,
@@ -873,7 +864,7 @@ export function useListNavigation(
               if (isCrossCloseKey && !isCurrentTarget) {
                 dispatchItem = deepestNode.context?.elements.domReference;
               } else if (isCrossOpenKey) {
-                dispatchItem = listRef().find((listItem) => listItem?.id === activeId());
+                dispatchItem = items().find((listItem) => listItem?.id === activeId());
               }
 
               if (dispatchItem) {
@@ -916,7 +907,7 @@ export function useListNavigation(
             stopEvent(event);
 
             if (context.open) {
-              index = getMinListIndex(listRef, props.disabledIndices);
+              index = getMinListIndex(items, props.disabledIndices);
               onNavigate();
             } else {
               context.onOpenChange(true, event, 'list-navigation');

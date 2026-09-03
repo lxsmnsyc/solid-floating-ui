@@ -19,7 +19,6 @@ export interface ArrowOptions {
  * Provides data to position an inner element of the floating element so that it
  * appears centered to the reference element. Wraps the core `arrow` middleware
  * to allow a ref as the element.
- * @see https://floating-ui.com/docs/arrow
  */
 export function arrow(options: ArrowOptions | Derivable<ArrowOptions>): Middleware {
   return {

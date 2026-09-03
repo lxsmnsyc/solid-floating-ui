@@ -56,7 +56,6 @@ export interface FloatingDelayGroupProps {
 /**
  * Provides context for a group of floating elements that should share a
  * `delay`.
- * @see https://floating-ui.com/docs/FloatingDelayGroup
  */
 export function FloatingDelayGroup(props: FloatingDelayGroupProps): JSX.Element {
   const [delay, setDelay] = createSignal<Delay>(props.delay);
@@ -134,7 +133,6 @@ export interface UseDelayGroupOptions {
 /**
  * Enables grouping when called inside a component that is a child of a
  * `FloatingDelayGroup`.
- * @see https://floating-ui.com/docs/FloatingDelayGroup
  */
 export function useDelayGroup(
   context: FloatingRootContext,

@@ -21,7 +21,8 @@ check every call site for these, in order of how much damage they do:
 7. `whileElementsMounted: autoUpdate` missing on an element that must stay
    anchored while the page scrolls.
 8. A prop getter called inside a loop instead of `getItemProps`.
-9. `createRef` used where the option takes an accessor, or the reverse.
+9. A value passed where the option expects an accessor, such as `items={list()}`
+   instead of `items={list}`.
 10. Markup gated on `open()` while a transition hook is in use, so the exit
     animation never plays.
 

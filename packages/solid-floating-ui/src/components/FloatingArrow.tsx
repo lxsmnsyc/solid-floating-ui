@@ -60,7 +60,6 @@ export interface FloatingArrowProps extends JSX.SvgSVGAttributes<SVGSVGElement> 
 
 /**
  * Renders a pointing arrow triangle.
- * @see https://floating-ui.com/docs/FloatingArrow
  */
 export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
   const [local, rest] = splitProps(props, [

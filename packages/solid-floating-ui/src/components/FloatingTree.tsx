@@ -1,8 +1,7 @@
-import { type JSX, createContext, onCleanup, useContext } from 'solid-js';
+import { type JSX, createContext, createSignal, onCleanup, useContext } from 'solid-js';
 import useId from '../hooks/useId';
 import type { FloatingNodeType, FloatingTreeType } from '../types';
 import createEventEmitter from '../utils/createEventEmitter';
-import { createRef } from '../utils/ref';
 
 const FloatingNodeContext = createContext<FloatingNodeType | null>(null);
 const FloatingTreeContext = createContext<FloatingTreeType | null>(null);
@@ -24,7 +23,6 @@ export function useFloatingTree(): FloatingTreeType | null {
 
 /**
  * Registers a node into the `FloatingTree`, returning its id.
- * @see https://floating-ui.com/docs/FloatingTree
  */
 export function useFloatingNodeId(customParentId?: string): string {
   const id = useId();
@@ -48,7 +46,6 @@ export interface FloatingNodeProps {
 
 /**
  * Provides parent node context for nested floating elements.
- * @see https://floating-ui.com/docs/FloatingTree
  */
 export function FloatingNode(props: FloatingNodeProps): JSX.Element {
   const parentId = useFloatingParentNodeId();
@@ -75,20 +72,19 @@ export interface FloatingTreeProps {
  * - Nested virtual list navigation
  * - Nested floating elements that each open on hover
  * - Custom communication between parent and child floating elements
- * @see https://floating-ui.com/docs/FloatingTree
  */
 export function FloatingTree(props: FloatingTreeProps): JSX.Element {
-  const nodesRef = createRef<FloatingNodeType[]>([]);
+  const [nodes, setNodes] = createSignal<FloatingNodeType[]>([]);
   const events = createEventEmitter();
 
   const context: FloatingTreeType = {
-    nodesRef,
+    nodes,
     events,
     addNode(node) {
-      nodesRef.current = [...nodesRef.current, node];
+      setNodes((previous) => [...previous, node]);
     },
     removeNode(node) {
-      nodesRef.current = nodesRef.current.filter((n) => n !== node);
+      setNodes((previous) => previous.filter((n) => n !== node));
     },
   };
 

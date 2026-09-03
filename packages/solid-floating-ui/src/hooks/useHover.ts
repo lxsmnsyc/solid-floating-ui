@@ -106,7 +106,6 @@ export interface UseHoverProps {
 /**
  * Opens the floating element while hovering over the reference element, like
  * CSS `:hover`.
- * @see https://floating-ui.com/docs/useHover
  */
 export function useHover(context: FloatingRootContext, props: UseHoverProps = {}): ElementProps {
   const enabled = (): boolean => props.enabled !== false;
@@ -129,13 +128,13 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
   let restTimeoutPending = false;
 
   function isHoverOpen(): boolean {
-    const type = context.dataRef.current.openEvent?.type;
+    const type = context.data.openEvent?.type;
     return !!type?.includes('mouse') && type !== 'mousedown';
   }
 
   function isClickLikeOpenEvent(): boolean {
-    return context.dataRef.current.openEvent
-      ? ['click', 'mousedown'].includes(context.dataRef.current.openEvent.type)
+    return context.data.openEvent
+      ? ['click', 'mousedown'].includes(context.data.openEvent.type)
       : false;
   }
 
@@ -179,7 +178,7 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
     event: MouseEvent,
     onClose: () => void,
   ): HandleCloseContext | null {
-    const floatingContext = context.dataRef.current.floatingContext;
+    const floatingContext = context.data.floatingContext;
     if (!floatingContext) {
       return null;
     }
@@ -215,7 +214,7 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
         floatingContext.onOpenChange(open, openEvent, reason);
       },
       events: floatingContext.events,
-      dataRef: floatingContext.dataRef,
+      data: floatingContext.data,
       nodeId: floatingContext.nodeId,
       floatingId: floatingContext.floatingId,
       refs: floatingContext.refs,
@@ -454,7 +453,7 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
         const body = getDocument(floatingEl).body;
         body.setAttribute(safePolygonIdentifier, '');
 
-        const parentFloating = tree?.nodesRef.current.find((node) => node.id === parentId)?.context
+        const parentFloating = tree?.nodes().find((node) => node.id === parentId)?.context
           ?.elements.floating;
 
         if (parentFloating) {

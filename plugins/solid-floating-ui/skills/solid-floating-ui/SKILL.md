@@ -38,7 +38,7 @@ the two files' hooks passed to one `useInteractions`.
 
 1. **Options are getters.** Anything that changes is `get open() { return open(); }`, never a captured value and never destructured. There are no dependency arrays.
 2. **Return values are getters too.** Keep the object and read through it where the value is used: `floating.placement`, not `const { placement } = floating`.
-3. **Reading is an accessor, writing is a ref.** `listRef`, `scrollRef`, the `arrow` element, a portal `root`, `initialFocus` and `returnFocus` all take `() => T`. `createRef()` is only for containers the library fills in, such as `FloatingList`'s `elementsRef`.
+3. **Accessors in, callbacks out.** Anything the library reads from you takes `() => T`: `items`, `labels`, `scrollElement`, the `arrow` element, a portal `root`, `initialFocus`, `returnFocus`. Anything it produces arrives through a callback: `onElementsChange`, `onLabelsChange`, `onVirtualItemChange`, `onOverflowChange`. There are no ref containers.
 4. **Spread the prop getters once.** `{...interactions.getFloatingProps()}` in the markup stays live on its own. Never call it inside a loop; that is what `getItemProps` is for.
 
 ## Install

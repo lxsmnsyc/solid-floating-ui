@@ -8,13 +8,11 @@ import type {
   UseFloatingOptions,
   UseFloatingReturn,
 } from '../types';
-import { createRef } from '../utils/ref';
 import { useFloatingRootContext } from './useFloatingRootContext';
 import usePosition from './usePosition';
 
 /**
  * Provides data to position a floating element and context to add interactions.
- * @see https://floating-ui.com/docs/useFloating
  */
 export default function useFloating(options: UseFloatingOptions = {}): UseFloatingReturn {
   const internalRootContext = useFloatingRootContext({
@@ -42,16 +40,8 @@ export default function useFloating(options: UseFloatingOptions = {}): UseFloati
   const domReference = createMemo(
     () => rootContext.elements.domReference ?? internalDomReference(),
   );
-  const domReferenceRef = createRef<Element | null>(null);
 
   const tree = useFloatingTree();
-
-  createRenderEffect(() => {
-    const node = domReference();
-    if (node) {
-      domReferenceRef.current = node;
-    }
-  });
 
   const position = usePosition({
     get placement() {
@@ -99,28 +89,20 @@ export default function useFloating(options: UseFloatingOptions = {}): UseFloati
 
   function setReference(node: ReferenceType | null): void {
     if (isElement(node) || node === null) {
-      domReferenceRef.current = node;
       setInternalDomReference(() => node);
     }
 
-    // Backwards-compatibility for passing a virtual element to `reference`
-    // after it has set the DOM reference.
-    if (
-      isElement(position.refs.reference.current) ||
-      position.refs.reference.current === null ||
-      // Don't allow setting virtual elements using the old technique back to
-      // `null` to support `positionReference` + an unstable `reference`
-      // callback ref.
-      (node !== null && !isElement(node))
-    ) {
+    // Passing a virtual element to `reference` after the DOM reference has
+    // been set is still supported, but a virtual reference is never set back
+    // to `null` that way, so that `positionReference` keeps working alongside
+    // an unstable `reference` callback ref.
+    const current = position.elements.reference;
+    if (isElement(current) || current === null || (node !== null && !isElement(node))) {
       position.refs.setReference(node);
     }
   }
 
   const refs = {
-    reference: position.refs.reference as { current: ReferenceType | null },
-    floating: position.refs.floating,
-    domReference: domReferenceRef,
     setReference,
     setFloating(node: HTMLElement | null) {
       position.refs.setFloating(node);
@@ -172,7 +154,7 @@ export default function useFloating(options: UseFloatingOptions = {}): UseFloati
       rootContext.onOpenChange(open, event, reason);
     },
     events: rootContext.events,
-    dataRef: rootContext.dataRef,
+    data: rootContext.data,
     floatingId: rootContext.floatingId,
     get nodeId() {
       return options.nodeId;
@@ -181,10 +163,10 @@ export default function useFloating(options: UseFloatingOptions = {}): UseFloati
     elements,
   };
 
-  rootContext.dataRef.current.floatingContext = context;
+  rootContext.data.floatingContext = context;
 
   createRenderEffect(() => {
-    const node = tree?.nodesRef.current.find((n) => n.id === options.nodeId);
+    const node = tree?.nodes().find((n) => n.id === options.nodeId);
     if (node) {
       node.context = context;
     }

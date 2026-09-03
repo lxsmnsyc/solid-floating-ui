@@ -9,7 +9,6 @@ import {
 import { getDelay } from '../hooks/useHover';
 import type { Delay, FloatingRootContext } from '../types';
 import { createCleanupEffect } from '../utils/reactivity';
-import { type Ref, createRef } from '../utils/ref';
 import { clearTimeoutIfSet } from '../utils/schedule';
 
 interface CurrentContext {
@@ -17,24 +16,32 @@ interface CurrentContext {
   setIsInstantPhase(value: boolean): void;
 }
 
+/**
+ * Bookkeeping the group members share. Mutated in place, because changing it
+ * must not re-run the members that read it.
+ */
+interface NextGroupState {
+  timeoutId: number;
+  currentId: string | null;
+  current: CurrentContext | null;
+}
+
 interface NextGroupContextValue {
   hasProvider: boolean;
   readonly timeoutMs: number;
-  delayRef: Ref<Delay>;
-  initialDelayRef: Ref<Delay>;
-  timeoutIdRef: Ref<number>;
-  currentIdRef: Ref<string | null>;
-  currentContextRef: Ref<CurrentContext | null>;
+  readonly initialDelay: Delay;
+  delay(): Delay;
+  setDelay(delay: Delay): void;
+  state: NextGroupState;
 }
 
 const NextFloatingDelayGroupContext = createContext<NextGroupContextValue>({
   hasProvider: false,
   timeoutMs: 0,
-  delayRef: { current: 0 },
-  initialDelayRef: { current: 0 },
-  timeoutIdRef: { current: -1 },
-  currentIdRef: { current: null },
-  currentContextRef: { current: null },
+  initialDelay: 0,
+  delay: () => 0,
+  setDelay: () => {},
+  state: { timeoutId: -1, currentId: null, current: null },
 });
 
 export interface NextFloatingDelayGroupProps {
@@ -54,25 +61,24 @@ export interface NextFloatingDelayGroupProps {
  * Experimental next version of `FloatingDelayGroup`, to become the default in
  * the future. Provides context for a group of floating elements that should
  * share a `delay`.
- * @see https://floating-ui.com/docs/FloatingDelayGroup
  */
 export function NextFloatingDelayGroup(props: NextFloatingDelayGroupProps): JSX.Element {
-  const delayRef = createRef<Delay>(props.delay);
-  const initialDelayRef = createRef<Delay>(props.delay);
-  const currentIdRef = createRef<string | null>(null);
-  const currentContextRef = createRef<CurrentContext | null>(null);
-  const timeoutIdRef = createRef(-1);
+  const [delay, setDelay] = createSignal<Delay>(props.delay);
+  const state: NextGroupState = { timeoutId: -1, currentId: null, current: null };
 
   const context: NextGroupContextValue = {
     hasProvider: true,
     get timeoutMs() {
       return props.timeoutMs ?? 0;
     },
-    delayRef,
-    initialDelayRef,
-    currentIdRef,
-    currentContextRef,
-    timeoutIdRef,
+    get initialDelay() {
+      return props.delay;
+    },
+    delay,
+    setDelay(value) {
+      setDelay(() => value);
+    },
+    state,
   };
 
   return (
@@ -92,9 +98,9 @@ export interface UseNextDelayGroupOptions {
 
 export interface UseNextDelayGroupReturn {
   /**
-   * The delay reference object.
+   * The delay the group is currently imposing.
    */
-  delayRef: Ref<Delay>;
+  readonly delay: Delay;
   /**
    * Whether animations should be removed.
    */
@@ -108,7 +114,6 @@ export interface UseNextDelayGroupReturn {
 /**
  * Enables grouping when called inside a component that is a child of a
  * `NextFloatingDelayGroup`.
- * @see https://floating-ui.com/docs/FloatingDelayGroup
  */
 export function useNextDelayGroup(
   context: FloatingRootContext,
@@ -117,33 +122,33 @@ export function useNextDelayGroup(
   const enabled = (): boolean => options.enabled !== false;
 
   const groupContext = useContext(NextFloatingDelayGroupContext);
-  const { currentIdRef, delayRef, initialDelayRef, currentContextRef, timeoutIdRef } = groupContext;
+  const state = groupContext.state;
 
   const [isInstantPhase, setIsInstantPhase] = createSignal(false);
 
   createCleanupEffect(() => {
     function unset(): void {
       setIsInstantPhase(false);
-      currentContextRef.current?.setIsInstantPhase(false);
-      currentIdRef.current = null;
-      currentContextRef.current = null;
-      delayRef.current = initialDelayRef.current;
+      state.current?.setIsInstantPhase(false);
+      state.currentId = null;
+      state.current = null;
+      groupContext.setDelay(groupContext.initialDelay);
     }
 
     if (!enabled()) {
       return undefined;
     }
-    if (!currentIdRef.current) {
+    if (!state.currentId) {
       return undefined;
     }
 
-    if (!context.open && currentIdRef.current === context.floatingId) {
+    if (!context.open && state.currentId === context.floatingId) {
       setIsInstantPhase(false);
 
       if (groupContext.timeoutMs) {
-        timeoutIdRef.current = window.setTimeout(unset, groupContext.timeoutMs);
+        state.timeoutId = window.setTimeout(unset, groupContext.timeoutMs);
         return () => {
-          timeoutIdRef.current = clearTimeoutIfSet(timeoutIdRef.current);
+          state.timeoutId = clearTimeoutIfSet(state.timeoutId);
         };
       }
 
@@ -161,10 +166,10 @@ export function useNextDelayGroup(
       return;
     }
 
-    const prevContext = currentContextRef.current;
-    const prevId = currentIdRef.current;
+    const prevContext = state.current;
+    const prevId = state.currentId;
 
-    currentContextRef.current = {
+    state.current = {
       onOpenChange: (open) => {
         context.onOpenChange(open);
       },
@@ -172,14 +177,14 @@ export function useNextDelayGroup(
         setIsInstantPhase(value);
       },
     };
-    currentIdRef.current = context.floatingId;
-    delayRef.current = {
+    state.currentId = context.floatingId;
+    groupContext.setDelay({
       open: 0,
-      close: getDelay(initialDelayRef.current, 'close'),
-    };
+      close: getDelay(groupContext.initialDelay, 'close'),
+    });
 
     if (prevId !== null && prevId !== context.floatingId) {
-      timeoutIdRef.current = clearTimeoutIfSet(timeoutIdRef.current);
+      state.timeoutId = clearTimeoutIfSet(state.timeoutId);
       setIsInstantPhase(true);
       prevContext?.setIsInstantPhase(true);
       prevContext?.onOpenChange(false);
@@ -190,12 +195,14 @@ export function useNextDelayGroup(
   });
 
   onCleanup(() => {
-    currentContextRef.current = null;
+    state.current = null;
   });
 
   return {
     hasProvider: groupContext.hasProvider,
-    delayRef,
+    get delay() {
+      return groupContext.delay();
+    },
     get isInstantPhase() {
       return isInstantPhase();
     },

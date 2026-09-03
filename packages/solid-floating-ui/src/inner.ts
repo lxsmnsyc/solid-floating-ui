@@ -9,11 +9,10 @@ import { offset } from '@floating-ui/dom';
 import { evaluate, max, min, round } from '@floating-ui/utils';
 import { DEV } from 'solid-js';
 import type { AnyElementProps, ElementProps, FloatingRootContext } from './types';
-import type { ListRef } from './utils/composite';
+import type { ListItems } from './utils/composite';
 import { warn } from './utils/log';
 import { getUserAgent } from './utils/platform';
 import { createCleanupEffect } from './utils/reactivity';
-import type { Ref } from './utils/ref';
 
 function getArgsWithCustomFloatingHeight(state: MiddlewareState, height: number): MiddlewareState {
   return {
@@ -30,10 +29,10 @@ function getArgsWithCustomFloatingHeight(state: MiddlewareState, height: number)
 
 export interface InnerProps extends DetectOverflowOptions {
   /**
-   * A ref which contains an array of HTML elements.
+   * Reads the list items, in index order.
    * @default empty list
    */
-  listRef: ListRef;
+  items: ListItems;
   /**
    * The index of the active (focused or highlighted) item in the list.
    * @default 0
@@ -49,16 +48,16 @@ export interface InnerProps extends DetectOverflowOptions {
    */
   offset?: number | undefined;
   /**
-   * A ref which contains the overflow of the floating element.
+   * Called with the floating element's measured overflow. Pair it with
+   * `useInnerOffset`, which reads the same value back.
    */
-  overflowRef?: Ref<SideObject | null> | undefined;
+  onOverflowChange?: ((overflow: SideObject) => void) | undefined;
   /**
-   * An optional ref containing an `HTMLElement`. May be used as the scrolling
-   * container instead of the floating element, for instance to position inner
-   * elements as direct children without being interfered with by scrolling
-   * layout.
+   * Reads an element to use as the scrolling container instead of the floating
+   * element, for instance to position inner elements as direct children
+   * without being interfered with by scrolling layout.
    */
-  scrollRef?: (() => HTMLElement | null) | undefined;
+  scrollElement?: (() => HTMLElement | null) | undefined;
   /**
    * The minimum number of items that should be visible in the list.
    * @default 4
@@ -74,21 +73,20 @@ export interface InnerProps extends DetectOverflowOptions {
 /**
  * Positions the floating element such that an inner element inside of it is
  * anchored to the reference element.
- * @see https://floating-ui.com/docs/inner
  */
 export const inner = (props: InnerProps | Derivable<InnerProps>): Middleware => ({
   name: 'inner',
   options: props,
   async fn(state) {
     const {
-      listRef,
-      overflowRef,
+      items,
+      onOverflowChange,
       onFallbackChange,
       offset: innerOffset = 0,
       index,
       minItemsVisible = 4,
       referenceOverflowThreshold = 0,
-      scrollRef,
+      scrollElement,
       ...detectOverflowOptions
     } = evaluate(props, state);
 
@@ -98,13 +96,13 @@ export const inner = (props: InnerProps | Derivable<InnerProps>): Middleware => 
       elements: { floating },
     } = state;
 
-    const item = listRef()[index];
-    const scrollEl = scrollRef?.() ?? floating;
+    const item = items()[index];
+    const scrollEl = scrollElement?.() ?? floating;
 
     // Valid combinations:
-    // 1. Floating element is the `scrollRef` and has a border (default)
-    // 2. Floating element is not the `scrollRef`, floating element has a border
-    // 3. Floating element is not the `scrollRef`, `scrollRef` has a border
+    // 1. Floating element is the `scrollElement` and has a border (default)
+    // 2. Floating element is not the `scrollElement`, floating element has a border
+    // 3. Floating element is not the `scrollElement`, `scrollElement` has a border
     const clientTop = floating.clientTop || scrollEl.clientTop;
     const floatingIsBordered = floating.clientTop !== 0;
     const scrollElIsBordered = scrollEl.clientTop !== 0;
@@ -164,20 +162,22 @@ export const inner = (props: InnerProps | Derivable<InnerProps>): Middleware => 
     // There is not enough space, fall back to standard anchored positioning.
     if (onFallbackChange) {
       const shouldFallback =
-        scrollEl.offsetHeight < item.offsetHeight * min(minItemsVisible, listRef().length) - 1 ||
+        scrollEl.offsetHeight < item.offsetHeight * min(minItemsVisible, items().length) - 1 ||
         refOverflow.top >= -referenceOverflowThreshold ||
         refOverflow.bottom >= -referenceOverflowThreshold;
 
       onFallbackChange(shouldFallback);
     }
 
-    if (overflowRef) {
-      overflowRef.current = await platform.detectOverflow(
-        getArgsWithCustomFloatingHeight(
-          { ...nextArgs, y: nextY },
-          scrollEl.offsetHeight + clientTop + floating.clientTop,
+    if (onOverflowChange) {
+      onOverflowChange(
+        await platform.detectOverflow(
+          getArgsWithCustomFloatingHeight(
+            { ...nextArgs, y: nextY },
+            scrollEl.offsetHeight + clientTop + floating.clientTop,
+          ),
+          detectOverflowOptions,
         ),
-        detectOverflowOptions,
       );
     }
 
@@ -195,14 +195,15 @@ export interface UseInnerOffsetProps {
    */
   enabled?: boolean | undefined;
   /**
-   * A ref which contains the overflow of the floating element.
+   * Reads the floating element's overflow, as reported by the `inner`
+   * middleware's `onOverflowChange`.
    */
-  overflowRef: Ref<SideObject | null>;
+  overflow: () => SideObject | null;
   /**
-   * An optional ref containing an `HTMLElement` used as the scrolling
-   * container instead of the floating element.
+   * Reads an element to use as the scrolling container instead of the floating
+   * element.
    */
-  scrollRef?: (() => HTMLElement | null) | undefined;
+  scrollElement?: (() => HTMLElement | null) | undefined;
   /**
    * Callback invoked when the offset changes.
    */
@@ -212,7 +213,6 @@ export interface UseInnerOffsetProps {
 /**
  * Changes the `inner` middleware's `offset` upon a `wheel` event to expand the
  * floating element's height, revealing more list items.
- * @see https://floating-ui.com/docs/inner
  */
 export function useInnerOffset(
   context: FloatingRootContext,
@@ -228,16 +228,18 @@ export function useInnerOffset(
       return undefined;
     }
 
-    const el = props.scrollRef?.() ?? context.elements.floating;
+    const el = props.scrollElement?.() ?? context.elements.floating;
 
     function onWheel(event: WheelEvent): void {
-      if (event.ctrlKey || !el || props.overflowRef.current == null) {
+      const currentOverflow = props.overflow();
+
+      if (event.ctrlKey || !el || currentOverflow == null) {
         return;
       }
 
       const dY = event.deltaY;
-      const isAtTop = props.overflowRef.current.top >= -0.5;
-      const isAtBottom = props.overflowRef.current.bottom >= -0.5;
+      const isAtTop = currentOverflow.top >= -0.5;
+      const isAtBottom = currentOverflow.bottom >= -0.5;
       const remainingScroll = el.scrollHeight - el.clientHeight;
       const sign = dY < 0 ? -1 : 1;
       const method = dY < 0 ? 'max' : 'min';
@@ -284,9 +286,11 @@ export function useInnerOffset(
       controlledScrolling = false;
     },
     onScroll() {
-      const el = props.scrollRef?.() ?? context.elements.floating;
+      const el = props.scrollElement?.() ?? context.elements.floating;
 
-      if (!props.overflowRef.current || !el || !controlledScrolling) {
+      const currentOverflow = props.overflow();
+
+      if (!currentOverflow || !el || !controlledScrolling) {
         return;
       }
 
@@ -294,8 +298,8 @@ export function useInnerOffset(
         const scrollDiff = el.scrollTop - prevScrollTop;
 
         if (
-          (props.overflowRef.current.bottom < -0.5 && scrollDiff < -1) ||
-          (props.overflowRef.current.top < -0.5 && scrollDiff > 1)
+          (currentOverflow.bottom < -0.5 && scrollDiff < -1) ||
+          (currentOverflow.top < -0.5 && scrollDiff > 1)
         ) {
           props.onChange((d) => d + scrollDiff);
         }

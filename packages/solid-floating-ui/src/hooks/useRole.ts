@@ -38,7 +38,6 @@ const componentRoleToAriaRoleMap = new Map<AriaRole | ComponentRole, AriaRole | 
 /**
  * Adds base screen reader props to the reference and floating elements for a
  * given floating element `role`.
- * @see https://floating-ui.com/docs/useRole
  */
 export function useRole(context: FloatingRootContext, props: UseRoleProps = {}): ElementProps {
   const role = (): AriaRole | ComponentRole => props.role ?? 'dialog';

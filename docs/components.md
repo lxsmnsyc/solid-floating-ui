@@ -7,12 +7,13 @@ handles the rotation for each side, the border, and the alignment offset when
 `shift()` has moved the floating element.
 
 ```jsx
-import { FloatingArrow, arrow, createRef, offset, useFloating } from 'solid-floating-ui';
+import { FloatingArrow, arrow, offset, useFloating } from 'solid-floating-ui';
+import { createSignal } from 'solid-js';
 
-const arrowRef = createRef(null);
+const [arrowElement, setArrowElement] = createSignal(null);
 
 const floating = useFloating({
-  middleware: [offset(12), arrow({ element: arrowRef })],
+  middleware: [offset(12), arrow({ element: arrowElement })],
 });
 
 <div
@@ -24,7 +25,7 @@ const floating = useFloating({
   Content
   <FloatingArrow
     ref={(element) => {
-      arrowRef.current = element;
+      setArrowElement(element);
     }}
     context={floating.context}
     fill="#222"
@@ -62,11 +63,11 @@ clipped by `overflow: hidden`, or trapped under a stacking context.
 </Show>
 ```
 
-| Prop               | Type                                            | Default         | Description                                                                                          |
-| ------------------ | ----------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------- |
-| `id`               | `string`                                        |                 | Use the node with this id if it exists, otherwise create it.                                         |
-| `root`             | `HTMLElement \| ShadowRoot \| Ref<...> \| null` | `document.body` | Where to append the container.                                                                       |
-| `preserveTabOrder` | `boolean`                                       | `true`          | Keep tab order matching the component tree rather than the DOM tree, for non-modal focus management. |
+| Prop               | Type                                                                             | Default         | Description                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------- |
+| `id`               | `string`                                                                         |                 | Use the node with this id if it exists, otherwise create it.                                         |
+| `root`             | `HTMLElement \| ShadowRoot \| (() => HTMLElement \| ShadowRoot \| null) \| null` | `document.body` | Where to append the container. An accessor defers the lookup until the node exists.                  |
+| `preserveTabOrder` | `boolean`                                                                        | `true`          | Keep tab order matching the component tree rather than the DOM tree, for non-modal focus management. |
 
 `useFloatingPortalNode({ id, root })` returns the container element itself when
 you need to portal by hand.
@@ -108,8 +109,8 @@ to focus on close, and whether focus can leave at all.
 | `context`               | `FloatingRootContext`                        |               | The context from `useFloating`. Required.                                                    |
 | `disabled`              | `boolean`                                    | `false`       | Turn focus management off, for instance until a transition finishes.                         |
 | `modal`                 | `boolean`                                    | `true`        | Trap focus inside, and hide outside content from screen readers.                             |
-| `initialFocus`          | `number \| Ref<HTMLElement \| null>`         | `0`           | Which element to focus on open, as a tabbable index or a ref. `-1` focuses nothing.          |
-| `returnFocus`           | `boolean \| Ref<HTMLElement \| null>`        | `true`        | Where focus goes on close.                                                                   |
+| `initialFocus`          | `number \| (() => HTMLElement \| null)`      | `0`           | Which element to focus on open, as a tabbable index or an accessor. `-1` focuses nothing.    |
+| `returnFocus`           | `boolean \| (() => HTMLElement \| null)`     | `true`        | Where focus goes on close. An accessor names the element explicitly.                         |
 | `restoreFocus`          | `boolean`                                    | `false`       | Move focus to the nearest tabbable element if the focused element is removed.                |
 | `order`                 | `('reference' \| 'floating' \| 'content')[]` | `['content']` | The order focus cycles through.                                                              |
 | `guards`                | `boolean`                                    | `true`        | Render focus guards, so focus cannot escape into browser UI.                                 |
@@ -128,11 +129,18 @@ Collects list items into the refs that `useListNavigation` and `useTypeahead`
 need, without threading indices through your components.
 
 ```jsx
-const elementsRef = createRef([]);
-const labelsRef = createRef([]);
+const [items, setItems] = createSignal([]);
+const [labels, setLabels] = createSignal([]);
 
-<FloatingList elementsRef={elementsRef} labelsRef={labelsRef}>
-  <For each={items()}>{(item) => <Item label={item} />}</For>
+<FloatingList
+  onElementsChange={(value) => {
+    setItems(value);
+  }}
+  onLabelsChange={(value) => {
+    setLabels(value);
+  }}
+>
+  <For each={options()}>{(option) => <Item label={option} />}</For>
 </FloatingList>;
 
 function Item(props) {
@@ -156,13 +164,14 @@ function Item(props) {
 }
 ```
 
-`FloatingList` takes `elementsRef` (required) and `labelsRef` (only needed for
-typeahead). Both are `Ref` containers, because the component writes the items
-it collects into them. `useListNavigation` and `useTypeahead` read them back
-through an accessor, `listRef: () => elementsRef.current`.
+`FloatingList` takes `onElementsChange` and `onLabelsChange`, the second only
+needed for typeahead. Each is called with the collected list in DOM order, so
+the signals they fill go straight to `useListNavigation`'s `items` and
+`useTypeahead`'s `labels`.
 
 `useListItem({ label })` returns `{ ref, index }`, where `index` is a live read
-that settles once the item is registered, and is `-1` before then.
+that settles once the item is registered, and is `-1` before then. Without an
+explicit `label`, the item's text content is used.
 
 Items register in DOM order, so conditional and dynamically ordered lists stay
 correct.
@@ -197,13 +206,13 @@ function Menu(props) {
 }
 ```
 
-| Export                      | Description                                                     |
-| --------------------------- | --------------------------------------------------------------- |
-| `FloatingTree`              | The provider. Render it once, above the outermost menu.         |
-| `FloatingNode`              | Registers one floating element with the tree.                   |
-| `useFloatingNodeId()`       | A generated id, already registered with the parent.             |
-| `useFloatingParentNodeId()` | The parent's id, or `null` at the root.                         |
-| `useFloatingTree()`         | The tree itself: `nodesRef`, `events`, `addNode`, `removeNode`. |
+| Export                      | Description                                                    |
+| --------------------------- | -------------------------------------------------------------- |
+| `FloatingTree`              | The provider. Render it once, above the outermost menu.        |
+| `FloatingNode`              | Registers one floating element with the tree.                  |
+| `useFloatingNodeId()`       | A generated id, already registered with the parent.            |
+| `useFloatingParentNodeId()` | The parent's id, or `null` at the root.                        |
+| `useFloatingTree()`         | The tree itself: `nodes()`, `events`, `addNode`, `removeNode`. |
 
 `tree.events` is the channel the nested elements use to talk to each other, and
 you can emit and listen on it yourself for behaviour such as closing every
@@ -242,9 +251,7 @@ long the group stays warm after the close delay ends. `useDelayGroup(context,
 
 ## `NextFloatingDelayGroup`
 
-An experimental replacement for `FloatingDelayGroup` with a smaller API. It
-keeps the delay in a ref rather than in state, so joining the group does not
-re-run positioning.
+An experimental replacement for `FloatingDelayGroup` with a smaller API.
 
 ```jsx
 <NextFloatingDelayGroup delay={{ open: 500, close: 200 }}>
@@ -255,12 +262,12 @@ const group = useNextDelayGroup(floating.context);
 
 useHover(floating.context, {
   get delay() {
-    return group.delayRef.current;
+    return group.delay;
   },
 });
 ```
 
-`useNextDelayGroup(context, { enabled })` returns `{ delayRef, isInstantPhase,
+`useNextDelayGroup(context, { enabled })` returns `{ delay, isInstantPhase,
 hasProvider }`. `hasProvider` is `false` when there is no group above, which
 lets a component fall back to its own delay.
 

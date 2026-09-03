@@ -10,7 +10,7 @@ export {
   isIndexOutOfListBounds,
   isListIndexDisabled,
 } from './utils/composite';
-export type { DisabledIndices, ListRef } from './utils/composite';
+export type { DisabledIndices, ListItems } from './utils/composite';
 export { createAttribute } from './utils/constants';
 export {
   activeElement,
@@ -33,8 +33,6 @@ export {
 } from './utils/event';
 export { getDeepestNode, getNodeAncestors, getNodeChildren } from './utils/nodes';
 export { getPlatform, getUserAgent, isAndroid, isJSDOM, isMac, isSafari } from './utils/platform';
-export { createRef } from './utils/ref';
-export type { Ref } from './utils/ref';
 export {
   disableFocusInside,
   enableFocusInside,

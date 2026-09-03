@@ -15,7 +15,6 @@ import useId from '../hooks/useId';
 import type { OpenChangeReason } from '../types';
 import { createAttribute } from '../utils/constants';
 import { createCleanupEffect } from '../utils/reactivity';
-import { type Ref, createRef } from '../utils/ref';
 import {
   disableFocusInside,
   enableFocusInside,
@@ -44,14 +43,54 @@ export interface FocusManagerState {
   closeOnFocusOut: boolean;
 }
 
+type GuardSlot = HTMLSpanElement | null;
+
+export interface FocusGuards {
+  beforeInside(): GuardSlot;
+  afterInside(): GuardSlot;
+  beforeOutside(): GuardSlot;
+  afterOutside(): GuardSlot;
+  setBeforeInside(element: GuardSlot): void;
+  setAfterInside(element: GuardSlot): void;
+  setBeforeOutside(element: GuardSlot): void;
+  setAfterOutside(element: GuardSlot): void;
+}
+
+function createFocusGuards(): FocusGuards {
+  const [beforeInside, setBeforeInside] = createSignal<GuardSlot>(null);
+  const [afterInside, setAfterInside] = createSignal<GuardSlot>(null);
+  const [beforeOutside, setBeforeOutside] = createSignal<GuardSlot>(null);
+  const [afterOutside, setAfterOutside] = createSignal<GuardSlot>(null);
+
+  return {
+    beforeInside,
+    afterInside,
+    beforeOutside,
+    afterOutside,
+    setBeforeInside(element) {
+      setBeforeInside(element);
+    },
+    setAfterInside(element) {
+      setAfterInside(element);
+    },
+    setBeforeOutside(element) {
+      setBeforeOutside(element);
+    },
+    setAfterOutside(element) {
+      setAfterOutside(element);
+    },
+  };
+}
+
 export interface PortalContextValue {
   preserveTabOrder: boolean;
   portalNode: HTMLElement | null;
   setFocusManagerState: Setter<FocusManagerState | null>;
-  beforeInsideRef: Ref<HTMLSpanElement | null>;
-  afterInsideRef: Ref<HTMLSpanElement | null>;
-  beforeOutsideRef: Ref<HTMLSpanElement | null>;
-  afterOutsideRef: Ref<HTMLSpanElement | null>;
+  /**
+   * The four focus guards, held as signals so the portal and the focus manager
+   * can hand focus to one another's guards as they mount.
+   */
+  guards: FocusGuards;
 }
 
 const PortalContext = createContext<PortalContextValue | null>(null);
@@ -81,9 +120,6 @@ export interface UseFloatingPortalNodeProps {
   root?: PortalRoot;
 }
 
-/**
- * @see https://floating-ui.com/docs/FloatingPortal#usefloatingportalnode
- */
 export function useFloatingPortalNode(
   props: UseFloatingPortalNodeProps = {},
 ): Accessor<HTMLElement | null> {
@@ -177,7 +213,6 @@ export interface FloatingPortalProps {
  * outside of the app root and into the body. This ensures the floating element
  * can appear outside any parent container that causes clipping (such as
  * `overflow: hidden`) while retaining its location in the component tree.
- * @see https://floating-ui.com/docs/FloatingPortal
  */
 export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
   const preserveTabOrder = (): boolean => props.preserveTabOrder ?? true;
@@ -193,10 +228,7 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
 
   const [focusManagerState, setFocusManagerState] = createSignal<FocusManagerState | null>(null);
 
-  const beforeOutsideRef = createRef<HTMLSpanElement | null>(null);
-  const afterOutsideRef = createRef<HTMLSpanElement | null>(null);
-  const beforeInsideRef = createRef<HTMLSpanElement | null>(null);
-  const afterInsideRef = createRef<HTMLSpanElement | null>(null);
+  const guards = createFocusGuards();
 
   const shouldRenderGuards = (): boolean => {
     const state = focusManagerState();
@@ -259,10 +291,7 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
       return portalNode();
     },
     setFocusManagerState,
-    beforeInsideRef,
-    afterInsideRef,
-    beforeOutsideRef,
-    afterOutsideRef,
+    guards,
   };
 
   return (
@@ -273,11 +302,11 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
             <FocusGuard
               data-type="outside"
               ref={(element) => {
-                beforeOutsideRef.current = element;
+                guards.setBeforeOutside(element);
               }}
               onFocus={(event: FocusEvent) => {
                 if (isOutsideEvent(event, node())) {
-                  beforeInsideRef.current?.focus();
+                  guards.beforeInside()?.focus();
                 } else {
                   const domReference = focusManagerState()?.domReference ?? null;
                   getPreviousTabbable(domReference)?.focus();
@@ -294,11 +323,11 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
           <FocusGuard
             data-type="outside"
             ref={(element) => {
-              afterOutsideRef.current = element;
+              guards.setAfterOutside(element);
             }}
             onFocus={(event: FocusEvent) => {
               if (isOutsideEvent(event, node())) {
-                afterInsideRef.current?.focus();
+                guards.afterInside()?.focus();
               } else {
                 const state = focusManagerState();
                 const domReference = state?.domReference ?? null;

@@ -1,25 +1,5 @@
 # Utilities
 
-## `createRef`
-
-Creates the `{ current }` container the library writes into.
-
-```js
-import { createRef } from 'solid-floating-ui';
-
-const elementsRef = createRef([]);
-```
-
-It is not reactive. Writing `.current` schedules nothing, which is the point:
-these containers hold values that would cause a loop if every write were
-tracked, such as the list of DOM nodes a `FloatingList` collects while it
-renders.
-
-Use one only where an option asks for a `Ref`: `elementsRef` and `labelsRef` on
-`FloatingList`, `virtualItemRef` on `useListNavigation`, and `overflowRef` on
-`inner` and `useInnerOffset`. Everything the library merely reads takes an
-accessor instead. See [Reactivity](reactivity.md).
-
 ## `useId`
 
 A stable unique id, from `createUniqueId`.
@@ -33,16 +13,16 @@ you the floating element's. Reach for `useId` for your own labelling.
 
 ## `useMergeRefs`
 
-Combines several refs into one callback, for when a component has to hand its
+Combines several callback refs into one, for when a component has to hand its
 element to more than one consumer.
 
 ```jsx
-const setRef = useMergeRefs([floating.refs.setFloating, props.ref, localRef]);
+const setRef = useMergeRefs([floating.refs.setFloating, props.ref]);
 
 <div ref={setRef} />;
 ```
 
-Each entry may be a callback, a `Ref` container, or `undefined`.
+Entries may be `undefined`, which are skipped.
 
 ## `solid-floating-ui/utils`
 
@@ -87,7 +67,7 @@ Platform detection:
 
 Miscellaneous:
 
-`createAttribute`, `clearTimeoutIfSet`, `createRef`
+`createAttribute`, `clearTimeoutIfSet`
 
 `clearTimeoutIfSet(id)` clears a timeout and returns the id to store back, so
 the caller can keep it in a plain `let`:
@@ -102,7 +82,7 @@ timeout = clearTimeoutIfSet(timeout);
 
 Every public type is exported from the root entry point, including
 `FloatingContext`, `FloatingRootContext`, `ElementProps`, `OpenChangeReason`,
-`ContextData`, `UseFloatingOptions`, `UseFloatingReturn` and `Ref`. The
+`ContextData`, `UseFloatingOptions` and `UseFloatingReturn`. The
 positioning types from `@floating-ui/dom`, such as `Placement`, `Middleware`
 and `Strategy`, are re-exported too, so a project rarely needs to import from
 `@floating-ui/dom` directly.

@@ -104,6 +104,5 @@ Wrap the row once:
 - `timeoutMs` is how long the group stays warm after the close delay ends. It
   matters most when the close delay is zero.
 - `NextFloatingDelayGroup` with `useNextDelayGroup` is the experimental
-  successor. It keeps the delay in a ref rather than in state, so joining the
-  group does not re-run positioning, and `hasProvider` tells a component
-  whether a group is present at all.
+  successor, with a smaller API. `hasProvider` tells a component whether a
+  group is present at all, so it can fall back to its own delay.

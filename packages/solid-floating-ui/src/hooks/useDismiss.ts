@@ -126,7 +126,6 @@ export interface UseDismissProps {
 /**
  * Closes the floating element when a dismissal is requested, by default when
  * the user presses the `escape` key or outside of the floating element.
- * @see https://floating-ui.com/docs/useDismiss
  */
 export function useDismiss(
   context: FloatingRootContext,
@@ -158,15 +157,15 @@ export function useDismiss(
       return;
     }
 
-    const nodeId = context.dataRef.current.floatingContext?.nodeId;
-    const children = tree ? getNodeChildren(tree.nodesRef.current, nodeId) : [];
+    const nodeId = context.data.floatingContext?.nodeId;
+    const children = tree ? getNodeChildren(tree.nodes(), nodeId) : [];
 
     if (!bubbles().escapeKey) {
       event.stopPropagation();
 
       if (children.length > 0) {
         const shouldDismiss = children.every(
-          (child) => !child.context?.open || child.context.dataRef.current.escapeKeyBubbles,
+          (child) => !child.context?.open || child.context.data.escapeKeyBubbles,
         );
 
         if (!shouldDismiss) {
@@ -190,8 +189,8 @@ export function useDismiss(
   function closeOnPressOutside(event: MouseEvent): void {
     // Given developers can stop the propagation of the event, we can only be
     // confident with a positive value.
-    const insideTree = context.dataRef.current.insideTree;
-    context.dataRef.current.insideTree = false;
+    const insideTree = context.data.insideTree;
+    context.data.insideTree = false;
 
     // When click outside is lazy (`click` event), handle dragging.
     // Don't close if the press started or ended inside the floating element.
@@ -274,11 +273,11 @@ export function useDismiss(
       }
     }
 
-    const nodeId = context.dataRef.current.floatingContext?.nodeId;
+    const nodeId = context.data.floatingContext?.nodeId;
 
     const targetIsInsideChildren =
       tree &&
-      getNodeChildren(tree.nodesRef.current, nodeId).some((node) =>
+      getNodeChildren(tree.nodes(), nodeId).some((node) =>
         isEventTargetWithin(event, node.context?.elements.floating),
       );
 
@@ -290,10 +289,10 @@ export function useDismiss(
       return;
     }
 
-    const children = tree ? getNodeChildren(tree.nodesRef.current, nodeId) : [];
+    const children = tree ? getNodeChildren(tree.nodes(), nodeId) : [];
     if (children.length > 0) {
       const shouldDismiss = children.every(
-        (child) => !child.context?.open || child.context.dataRef.current.outsidePressBubbles,
+        (child) => !child.context?.open || child.context.data.outsidePressBubbles,
       );
 
       if (!shouldDismiss) {
@@ -319,8 +318,8 @@ export function useDismiss(
       return undefined;
     }
 
-    context.dataRef.current.escapeKeyBubbles = bubbles().escapeKey;
-    context.dataRef.current.outsidePressBubbles = bubbles().outsidePress;
+    context.data.escapeKeyBubbles = bubbles().escapeKey;
+    context.data.outsidePressBubbles = bubbles().outsidePress;
 
     let compositionTimeout = -1;
 
@@ -425,7 +424,7 @@ export function useDismiss(
 
   createRenderEffect(
     on([outsidePress, outsidePressEvent], () => {
-      context.dataRef.current.insideTree = false;
+      context.data.insideTree = false;
     }),
   );
 
@@ -460,7 +459,7 @@ export function useDismiss(
       onMouseDown: setMouseDownOrUpInside,
       onMouseUp: setMouseDownOrUpInside,
       [captureHandlerKeys[outsidePressEvent()]]: () => {
-        context.dataRef.current.insideTree = true;
+        context.data.insideTree = true;
       },
     };
   }

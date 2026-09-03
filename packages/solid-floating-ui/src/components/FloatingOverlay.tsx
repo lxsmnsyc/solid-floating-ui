@@ -75,7 +75,6 @@ let cleanupScrollLock: () => void = () => {};
  * Provides base styling for a fixed overlay element to dim content or block
  * pointer events behind a floating element. It is a regular `<div>`, so it can
  * be styled with any CSS solution.
- * @see https://floating-ui.com/docs/FloatingOverlay
  */
 export function FloatingOverlay(props: FloatingOverlayProps): JSX.Element {
   const [local, rest] = splitProps(props, ['lockScroll', 'style']);

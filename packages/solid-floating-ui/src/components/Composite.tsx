@@ -7,11 +7,10 @@ import {
   splitProps,
   useContext,
 } from 'solid-js';
-import { useMergeRefs } from '../hooks/useMergeRefs';
+import useMergeRefs from '../hooks/useMergeRefs';
 import type { AnyElementProps } from '../types';
 import {
   type DisabledIndices,
-  type ListRef,
   createGridCellMap,
   findNonDisabledListIndex,
   getGridCellIndexOfCorner,
@@ -23,7 +22,6 @@ import {
   isListIndexDisabled,
 } from '../utils/composite';
 import { ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP } from '../utils/constants';
-import { createRef } from '../utils/ref';
 import { FloatingList, useListItem } from './FloatingList';
 
 /**
@@ -126,7 +124,6 @@ const allKeys = [...horizontalKeys, ...verticalKeys];
  * Creates a single tab stop whose items are navigated by arrow keys, which
  * provides list navigation outside of floating element contexts. A menubar is
  * an example of a composite, with each reference element being an item.
- * @see https://floating-ui.com/docs/Composite
  */
 export function Composite(props: CompositeProps): JSX.Element {
   const [local, domProps] = splitProps(props, [
@@ -160,9 +157,9 @@ export function Composite(props: CompositeProps): JSX.Element {
     }
   }
 
-  const elementsRef = createRef<(HTMLElement | null)[]>([]);
-  // `FloatingList` fills the container in, and the navigation helpers read it.
-  const listRef: ListRef = () => elementsRef.current;
+  // `FloatingList` reports the items it collects, and the navigation helpers
+  // read them back.
+  const [items, setItems] = createSignal<(HTMLElement | null)[]>([]);
 
   function handleKeyDown(event: KeyboardEvent): void {
     if (!allKeys.includes(event.key)) {
@@ -177,8 +174,8 @@ export function Composite(props: CompositeProps): JSX.Element {
     const isGrid = currentCols > 1;
 
     let nextIndex = currentActiveIndex;
-    const minIndex = getMinListIndex(listRef, disabledIndices);
-    const maxIndex = getMaxListIndex(listRef, disabledIndices);
+    const minIndex = getMinListIndex(items, disabledIndices);
+    const maxIndex = getMaxListIndex(items, disabledIndices);
 
     const horizontalEndKey = currentRtl ? ARROW_LEFT : ARROW_RIGHT;
     const horizontalStartKey = currentRtl ? ARROW_RIGHT : ARROW_LEFT;
@@ -186,7 +183,7 @@ export function Composite(props: CompositeProps): JSX.Element {
     if (isGrid) {
       const sizes =
         local.itemSizes ??
-        Array.from({ length: listRef().length }, () => ({
+        Array.from({ length: items().length }, () => ({
           width: 1,
           height: 1,
         }));
@@ -196,12 +193,12 @@ export function Composite(props: CompositeProps): JSX.Element {
       const explicitDisabledIndices =
         typeof disabledIndices === 'function' ? undefined : disabledIndices;
       const minGridIndex = cellMap.findIndex(
-        (index) => index != null && !isListIndexDisabled(listRef, index, disabledIndices),
+        (index) => index != null && !isListIndexDisabled(items, index, disabledIndices),
       );
       // Last enabled index.
       const maxGridIndex = cellMap.reduce(
         (foundIndex: number, index, cellIndex) =>
-          index != null && !isListIndexDisabled(listRef, index, disabledIndices)
+          index != null && !isListIndexDisabled(items, index, disabledIndices)
             ? cellIndex
             : foundIndex,
         -1,
@@ -210,7 +207,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       const maybeNextIndex =
         cellMap[
           getGridNavigatedIndex(
-            () => cellMap.map((itemIndex) => (itemIndex ? (listRef()[itemIndex] ?? null) : null)),
+            () => cellMap.map((itemIndex) => (itemIndex ? (items()[itemIndex] ?? null) : null)),
             {
               event,
               orientation: currentOrientation,
@@ -222,8 +219,8 @@ export function Composite(props: CompositeProps): JSX.Element {
               disabledIndices: getGridCellIndices(
                 [
                   ...(explicitDisabledIndices ??
-                    listRef().map((_, index) =>
-                      isListIndexDisabled(listRef, index, disabledIndices) ? index : undefined,
+                    items().map((_, index) =>
+                      isListIndexDisabled(items, index, disabledIndices) ? index : undefined,
                     )),
                   undefined,
                 ],
@@ -273,7 +270,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       } else if (loop() && nextIndex === minIndex && toStartKeys.includes(event.key)) {
         nextIndex = maxIndex;
       } else {
-        nextIndex = findNonDisabledListIndex(listRef, {
+        nextIndex = findNonDisabledListIndex(items, {
           startingIndex: nextIndex,
           decrement: toStartKeys.includes(event.key),
           disabledIndices,
@@ -281,7 +278,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       }
     }
 
-    if (nextIndex !== currentActiveIndex && !isIndexOutOfListBounds(listRef, nextIndex)) {
+    if (nextIndex !== currentActiveIndex && !isIndexOutOfListBounds(items, nextIndex)) {
       event.stopPropagation();
 
       if (preventedKeys.includes(event.key)) {
@@ -289,7 +286,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       }
 
       onNavigate(nextIndex);
-      listRef()[nextIndex]?.focus();
+      items()[nextIndex]?.focus();
     }
   }
 
@@ -319,7 +316,11 @@ export function Composite(props: CompositeProps): JSX.Element {
 
   return (
     <CompositeContext.Provider value={context}>
-      <FloatingList elementsRef={elementsRef}>
+      <FloatingList
+        onElementsChange={(value) => {
+          setItems(value);
+        }}
+      >
         {renderJsx(local.render, computedProps)}
       </FloatingList>
     </CompositeContext.Provider>
@@ -345,9 +346,6 @@ export interface CompositeItemProps extends Omit<
   ref?: ((node: HTMLElement | null) => void) | undefined;
 }
 
-/**
- * @see https://floating-ui.com/docs/Composite
- */
 export function CompositeItem(props: CompositeItemProps): JSX.Element {
   const [local, domProps] = splitProps(props, ['render', 'ref', 'onFocus']);
 

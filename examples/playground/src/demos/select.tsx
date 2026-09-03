@@ -3,7 +3,6 @@ import {
   FloatingList,
   FloatingPortal,
   autoUpdate,
-  createRef,
   flip,
   offset,
   shift,
@@ -54,12 +53,21 @@ function Option(props: {
   return (
     <div
       class="option"
+      role="option"
+      tabindex={-1}
+      aria-selected={isSelected()}
       data-active={isActive()}
       {...props.getItemProps({
         active: isActive(),
         selected: isSelected(),
         onClick: () => {
           props.onSelect(listItem.index);
+        },
+        onKeyDown: (event: KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            props.onSelect(listItem.index);
+          }
         },
       })}
       ref={(element) => {
@@ -79,8 +87,8 @@ export default function SelectDemo(): JSX.Element {
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
   const [selectedIndex, setSelectedIndex] = createSignal<number | null>(null);
 
-  const elementsRef = createRef<(HTMLElement | null)[]>([]);
-  const labelsRef = createRef<(string | null)[]>([]);
+  const [items, setItems] = createSignal<(HTMLElement | null)[]>([]);
+  const [labels, setLabels] = createSignal<(string | null)[]>([]);
 
   const floating = useFloating({
     get open() {
@@ -108,7 +116,7 @@ export default function SelectDemo(): JSX.Element {
     useDismiss(floating.context),
     useRole(floating.context, { role: 'listbox' }),
     useListNavigation(floating.context, {
-      listRef: () => elementsRef.current,
+      items,
       get activeIndex() {
         return activeIndex();
       },
@@ -121,7 +129,7 @@ export default function SelectDemo(): JSX.Element {
       loop: true,
     }),
     useTypeahead(floating.context, {
-      listRef: () => labelsRef.current,
+      labels,
       get activeIndex() {
         return activeIndex();
       },
@@ -169,7 +177,14 @@ export default function SelectDemo(): JSX.Element {
                 }}
                 style={floating.floatingStyles}
               >
-                <FloatingList elementsRef={elementsRef} labelsRef={labelsRef}>
+                <FloatingList
+                  onElementsChange={(value) => {
+                    setItems(value);
+                  }}
+                  onLabelsChange={(value) => {
+                    setLabels(value);
+                  }}
+                >
                   <For each={FRUITS}>
                     {(fruit) => (
                       <Option

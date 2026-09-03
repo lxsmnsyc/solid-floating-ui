@@ -1,19 +1,13 @@
-import type { Ref } from '../utils/ref';
-
-export type RefLike<T> = Ref<T | null> | ((node: T | null) => void) | undefined;
-
 /**
- * Merges an array of refs into a single callback ref.
- * @see https://floating-ui.com/docs/react-utils#usemergerefs
+ * Merges several callback refs into one, for when a single element has to be
+ * handed to more than one consumer.
  */
-export function useMergeRefs<T>(refs: RefLike<T>[]): (node: T | null) => void {
+export default function useMergeRefs<T>(
+  refs: (((node: T | null) => void) | undefined)[],
+): (node: T | null) => void {
   return (node: T | null) => {
     for (const ref of refs) {
-      if (typeof ref === 'function') {
-        ref(node);
-      } else if (ref) {
-        ref.current = node;
-      }
+      ref?.(node);
     }
   };
 }

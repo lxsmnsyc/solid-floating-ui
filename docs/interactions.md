@@ -178,11 +178,11 @@ patterns ask for: looping, grids, typeahead-compatible focus, virtual focus and
 nested submenus.
 
 ```jsx
-const elementsRef = createRef([]);
+const [items, setItems] = createSignal([]);
 const [activeIndex, setActiveIndex] = createSignal(null);
 
 useListNavigation(floating.context, {
-  listRef: () => elementsRef.current,
+  items,
   get activeIndex() {
     return activeIndex();
   },
@@ -191,35 +191,35 @@ useListNavigation(floating.context, {
 });
 ```
 
-`listRef` is an accessor, because the hook only reads the items. Point it at
-whatever holds them: the container `FloatingList` fills in, as above, or a
-signal you maintain yourself.
+`items` is an accessor, because the hook only reads them. Point it at whatever
+holds them: a signal `FloatingList` fills in, as above, or one you maintain
+yourself.
 
-| Option               | Type                                   | Default      | Description                                                                                  |
-| -------------------- | -------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
-| `listRef`            | `Ref<(HTMLElement \| null)[]>`         |              | The items, in order. Required.                                                               |
-| `activeIndex`        | `number \| null`                       | `null`       | The focused or highlighted item. Required.                                                   |
-| `onNavigate`         | `(index: number \| null) => void`      |              | Called when navigation moves.                                                                |
-| `enabled`            | `boolean`                              | `true`       | Whether the hook runs at all.                                                                |
-| `selectedIndex`      | `number \| null`                       | `null`       | The selected item, which need not be the active one.                                         |
-| `loop`               | `boolean`                              | `false`      | Wrap around at the ends.                                                                     |
-| `allowEscape`        | `boolean`                              | `false`      | Allow navigating past the boundary to nothing selected. Requires `loop`.                     |
-| `nested`             | `boolean`                              | `false`      | The list is a submenu of another list.                                                       |
-| `rtl`                | `boolean`                              | `false`      | The layout is right to left.                                                                 |
-| `virtual`            | `boolean`                              | `false`      | Use `aria-activedescendant` and keep DOM focus on the reference. Items need unique ids.      |
-| `virtualItemRef`     | `Ref<HTMLElement \| null>`             |              | Holds the virtually focused item. Requires a `FloatingTree`.                                 |
-| `orientation`        | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | The navigation axis.                                                                         |
-| `parentOrientation`  | `'vertical' \| 'horizontal' \| 'both'` |              | The parent list's axis, when it cannot be detected.                                          |
-| `cols`               | `number`                               | `1`          | Number of columns, making the list a grid.                                                   |
-| `itemSizes`          | `Dimensions[]`                         |              | Sizes of grid items that span more than one cell.                                            |
-| `dense`              | `boolean`                              | `false`      | The grid is dense, as in `grid-auto-flow`.                                                   |
-| `focusItemOnOpen`    | `boolean \| 'auto'`                    | `'auto'`     | Focus an item when the element opens. `'auto'` decides from the input type.                  |
-| `focusItemOnHover`   | `boolean`                              | `true`       | Hovering an item makes it active.                                                            |
-| `openOnArrowKeyDown` | `boolean`                              | `true`       | Pressing an arrow key on the main axis opens the element.                                    |
-| `disabledIndices`    | `number[] \| (index) => boolean`       |              | Which indices to skip. By default, items carrying `disabled` or `aria-disabled` are skipped. |
-| `scrollItemIntoView` | `boolean \| ScrollIntoViewOptions`     | `true`       | Scroll the active item into view.                                                            |
+| Option                | Type                                   | Default      | Description                                                                                  |
+| --------------------- | -------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `items`               | `() => (HTMLElement \| null)[]`        |              | Reads the items, in order. Required.                                                         |
+| `activeIndex`         | `number \| null`                       | `null`       | The focused or highlighted item. Required.                                                   |
+| `onNavigate`          | `(index: number \| null) => void`      |              | Called when navigation moves.                                                                |
+| `enabled`             | `boolean`                              | `true`       | Whether the hook runs at all.                                                                |
+| `selectedIndex`       | `number \| null`                       | `null`       | The selected item, which need not be the active one.                                         |
+| `loop`                | `boolean`                              | `false`      | Wrap around at the ends.                                                                     |
+| `allowEscape`         | `boolean`                              | `false`      | Allow navigating past the boundary to nothing selected. Requires `loop`.                     |
+| `nested`              | `boolean`                              | `false`      | The list is a submenu of another list.                                                       |
+| `rtl`                 | `boolean`                              | `false`      | The layout is right to left.                                                                 |
+| `virtual`             | `boolean`                              | `false`      | Use `aria-activedescendant` and keep DOM focus on the reference. Items need unique ids.      |
+| `onVirtualItemChange` | `(item: HTMLElement \| null) => void`  |              | Called with the virtually focused item. Requires a `FloatingTree`.                           |
+| `orientation`         | `'vertical' \| 'horizontal' \| 'both'` | `'vertical'` | The navigation axis.                                                                         |
+| `parentOrientation`   | `'vertical' \| 'horizontal' \| 'both'` |              | The parent list's axis, when it cannot be detected.                                          |
+| `cols`                | `number`                               | `1`          | Number of columns, making the list a grid.                                                   |
+| `itemSizes`           | `Dimensions[]`                         |              | Sizes of grid items that span more than one cell.                                            |
+| `dense`               | `boolean`                              | `false`      | The grid is dense, as in `grid-auto-flow`.                                                   |
+| `focusItemOnOpen`     | `boolean \| 'auto'`                    | `'auto'`     | Focus an item when the element opens. `'auto'` decides from the input type.                  |
+| `focusItemOnHover`    | `boolean`                              | `true`       | Hovering an item makes it active.                                                            |
+| `openOnArrowKeyDown`  | `boolean`                              | `true`       | Pressing an arrow key on the main axis opens the element.                                    |
+| `disabledIndices`     | `number[] \| (index) => boolean`       |              | Which indices to skip. By default, items carrying `disabled` or `aria-disabled` are skipped. |
+| `scrollItemIntoView`  | `boolean \| ScrollIntoViewOptions`     | `true`       | Scroll the active item into view.                                                            |
 
-Collecting the items into `listRef` by hand is tedious, so
+Collecting the items by hand is tedious, so
 [`FloatingList`](components.md#floatinglist-and-uselistitem) does it for you.
 
 ## `useTypeahead`
@@ -227,10 +227,10 @@ Collecting the items into `listRef` by hand is tedious, so
 Matches items as the user types, the way a native `<select>` does.
 
 ```jsx
-const labelsRef = createRef([]);
+const [labels, setLabels] = createSignal([]);
 
 useTypeahead(floating.context, {
-  listRef: () => labelsRef.current,
+  labels,
   get activeIndex() {
     return activeIndex();
   },
@@ -238,17 +238,17 @@ useTypeahead(floating.context, {
 });
 ```
 
-| Option           | Type                                    | Default | Description                                                   |
-| ---------------- | --------------------------------------- | ------- | ------------------------------------------------------------- |
-| `listRef`        | `Ref<(string \| null)[]>`               |         | The item labels, in the same order as the elements. Required. |
-| `activeIndex`    | `number \| null`                        | `null`  | The active item. Required.                                    |
-| `onMatch`        | `(index: number) => void`               |         | Called with the matched index.                                |
-| `onTypingChange` | `(isTyping: boolean) => void`           |         | Called as typing starts and stops.                            |
-| `enabled`        | `boolean`                               | `true`  | Whether the hook runs at all.                                 |
-| `findMatch`      | `(list, typedString) => string \| null` |         | Replace the default case-insensitive prefix match.            |
-| `resetMs`        | `number`                                | `750`   | How long before the typed string resets.                      |
-| `ignoreKeys`     | `string[]`                              | `[]`    | Keys that should not contribute to the string.                |
-| `selectedIndex`  | `number \| null`                        | `null`  | The selected item, used to start matching after it.           |
+| Option           | Type                                    | Default | Description                                                         |
+| ---------------- | --------------------------------------- | ------- | ------------------------------------------------------------------- |
+| `labels`         | `() => (string \| null)[]`              |         | Reads the item labels, in the same order as the elements. Required. |
+| `activeIndex`    | `number \| null`                        | `null`  | The active item. Required.                                          |
+| `onMatch`        | `(index: number) => void`               |         | Called with the matched index.                                      |
+| `onTypingChange` | `(isTyping: boolean) => void`           |         | Called as typing starts and stops.                                  |
+| `enabled`        | `boolean`                               | `true`  | Whether the hook runs at all.                                       |
+| `findMatch`      | `(list, typedString) => string \| null` |         | Replace the default case-insensitive prefix match.                  |
+| `resetMs`        | `number`                                | `750`   | How long before the typed string resets.                            |
+| `ignoreKeys`     | `string[]`                              | `[]`    | Keys that should not contribute to the string.                      |
+| `selectedIndex`  | `number \| null`                        | `null`  | The selected item, used to start matching after it.                 |
 
 ## `useClientPoint`
 
@@ -276,22 +276,22 @@ middleware that positions the list by its active item, and `useInnerOffset`
 lets the user scroll the list beyond its bounds to reveal the rest.
 
 ```js
-import { createRef, inner, useInnerOffset } from 'solid-floating-ui';
+import { inner, useInnerOffset } from 'solid-floating-ui';
 
-const elementsRef = createRef([]);
-const overflowRef = createRef(null);
+const [items, setItems] = createSignal([]);
+const [overflow, setOverflow] = createSignal(null);
 const [innerOffset, setInnerOffset] = createSignal(0);
 
 const floating = useFloating({
   get middleware() {
     return [
       inner({
-        listRef: () => elementsRef.current,
+        items,
         get index() {
           return selectedIndex();
         },
         offset: innerOffset(),
-        overflowRef,
+        onOverflowChange: setOverflow,
         onFallbackChange: setFallback,
       }),
     ];
@@ -299,14 +299,14 @@ const floating = useFloating({
 });
 
 useInnerOffset(floating.context, {
-  overflowRef,
+  overflow,
   onChange: setInnerOffset,
 });
 ```
 
-`inner` takes the `DetectOverflowOptions` as well as `listRef`, `index`,
-`offset`, `overflowRef`, `scrollRef`, `minItemsVisible` (default `4`),
-`referenceOverflowThreshold` (default `0`) and `onFallbackChange`. `overflowRef`
-is a `Ref`, since both `inner` and `useInnerOffset` write the measured overflow
-into it, while `listRef` and `scrollRef` are accessors. When the list cannot
-fit, `onFallbackChange` fires and you fall back to a regular anchored listbox.
+`inner` takes the `DetectOverflowOptions` as well as `items`, `index`,
+`offset`, `onOverflowChange`, `scrollElement`, `minItemsVisible` (default `4`),
+`referenceOverflowThreshold` (default `0`) and `onFallbackChange`. The
+middleware measures the overflow and reports it; `useInnerOffset` reads the same
+value back through `overflow`. When the list cannot fit, `onFallbackChange`
+fires and you fall back to a regular anchored listbox.

@@ -4,7 +4,6 @@ import { useFloatingParentNodeId } from '../components/FloatingTree';
 import type { ContextData, FloatingRootContext, OpenChangeReason, ReferenceType } from '../types';
 import createEventEmitter from '../utils/createEventEmitter';
 import { error } from '../utils/log';
-import { createRef } from '../utils/ref';
 import useId from './useId';
 
 export interface UseFloatingRootContextOptions {
@@ -19,13 +18,12 @@ export interface UseFloatingRootContextOptions {
 /**
  * Creates the shared context an external floating element needs when its
  * position is managed elsewhere, so interaction hooks can still be attached.
- * @see https://floating-ui.com/docs/useFloatingRootContext
  */
 export function useFloatingRootContext(
   options: UseFloatingRootContextOptions,
 ): FloatingRootContext {
   const floatingId = useId();
-  const dataRef = createRef<ContextData>({});
+  const data: ContextData = {};
   const events = createEventEmitter();
   const nested = useFloatingParentNodeId() != null;
 
@@ -35,7 +33,7 @@ export function useFloatingRootContext(
   // subscribes the effect that happened to trigger it.
   function onOpenChange(open: boolean, event?: Event, reason?: OpenChangeReason): void {
     untrack(() => {
-      dataRef.current.openEvent = open ? event : undefined;
+      data.openEvent = open ? event : undefined;
       events.emit('openchange', { open, event, reason, nested });
       options.onOpenChange?.(open, event, reason);
     });
@@ -62,7 +60,7 @@ export function useFloatingRootContext(
   };
 
   return {
-    dataRef,
+    data,
     get open() {
       return options.open ?? false;
     },
