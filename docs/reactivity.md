@@ -1,9 +1,8 @@
 # Reactivity
 
-`@floating-ui/react` re-runs a hook body on every render and uses dependency
-arrays to decide what to recompute. SolidJS runs a component body once, so this
-package works the way SolidJS component props do instead: every option is read
-lazily, at the moment the value is needed, inside a tracking scope.
+A component body runs once, so nothing here is recomputed by running it again.
+Every option is read lazily instead, at the moment the value is needed, inside
+a tracking scope. That is how component props already work.
 
 ## Options are read, not captured
 

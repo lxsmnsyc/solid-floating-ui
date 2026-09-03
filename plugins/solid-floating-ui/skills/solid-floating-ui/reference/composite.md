@@ -54,8 +54,8 @@ A grid is the same component with `cols` set:
 
 ## Notes
 
-- `render` is the only way to choose the element, because SolidJS has no
-  `cloneElement`. Without it both components render a plain `div`.
+- `render` is the only way to choose the element. Without it both components
+  render a plain `div`.
 - Spread `htmlProps` onto the element before your own handlers, so the
   composite's `ref`, `tabindex` and key handling land.
 - `orientation` decides which arrows move: `'horizontal'`, `'vertical'` or

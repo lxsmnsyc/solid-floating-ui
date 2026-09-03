@@ -137,9 +137,9 @@ rather than overwrite, and run first:
 `getItemProps` also takes `active` and `selected` booleans, which the hooks
 consume rather than forward to the DOM.
 
-Prop getters emit SolidJS event names. `onFocusIn` and `onFocusOut` stand in
-for React's bubbling `onFocus` and `onBlur`, and style keys are kebab-case
-strings such as `'transform-origin'`.
+Prop getters emit SolidJS event names, so focus is handled through `onFocusIn`
+and `onFocusOut`. Style keys are kebab-case strings such as
+`'transform-origin'`.
 
 ## Positioning stays put unless told otherwise
 

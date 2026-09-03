@@ -172,10 +172,9 @@ Utilities:
 - There are no ref containers. Anything the library reads from you is an
   accessor, such as `items` or the `arrow` element, and anything it produces
   arrives through a callback, such as `FloatingList`'s `onElementsChange`.
-- `Composite` and `CompositeItem` take a `render` callback only, because
-  SolidJS has no `cloneElement`.
-- Prop getters produce SolidJS event names, so `onFocusIn` and `onFocusOut`
-  stand in for React's bubbling `onFocus` and `onBlur`.
+- `Composite` and `CompositeItem` take a `render` callback only.
+- Prop getters produce SolidJS event names, so focus is handled through
+  `onFocusIn` and `onFocusOut`.
 
 ### Updating the position
 

@@ -303,6 +303,5 @@ all: a toolbar, a tab list, a grid. It is the same navigation engine as
 
 `CompositeItem` takes `render`, `ref`, `onFocus` and any other HTML attribute.
 
-Unlike `@floating-ui/react`, `render` is the only way to choose the element,
-because SolidJS has no `cloneElement`. Passing children to `Composite` without
-`render` puts them inside a plain `div`.
+`render` is the only way to choose the element. Passing children to `Composite`
+without it puts them inside a plain `div`.
