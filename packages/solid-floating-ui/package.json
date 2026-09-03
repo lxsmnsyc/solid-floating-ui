@@ -1,69 +1,82 @@
 {
   "name": "solid-floating-ui",
-  "type": "module",
   "version": "0.3.1",
+  "private": false,
+  "description": "SolidJS bindings for Floating UI",
+  "keywords": [
+    "dropdown",
+    "floating-ui",
+    "menu",
+    "popover",
+    "popup",
+    "positioning",
+    "solid-js",
+    "tooltip"
+  ],
+  "homepage": "https://github.com/lxsmnsyc/solid-floating-ui/tree/main/packages/solid-floating-ui",
+  "bugs": {
+    "url": "https://github.com/lxsmnsyc/solid-floating-ui/issues"
+  },
+  "license": "MIT",
+  "author": "Alexis Munsayac",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lxsmnsyc/solid-floating-ui.git"
+  },
   "files": [
     "dist",
     "src"
   ],
-  "engines": {
-    "node": ">=10"
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "solid": "./dist/index.jsx",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.jsx"
+    },
+    "./utils": {
+      "solid": "./dist/utils.jsx",
+      "types": "./dist/utils.d.ts",
+      "default": "./dist/utils.jsx"
+    },
+    "./package.json": "./package.json"
   },
-  "license": "MIT",
-  "keywords": [
-    "pridepack"
-  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "tsdown",
+    "test": "playwright test",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "e2e:dev": "vite --config e2e/vite.config.ts",
+    "type-check": "tsc --noEmit && tsc --noEmit -p e2e/tsconfig.json",
+    "watch": "tsdown --watch"
+  },
+  "dependencies": {
+    "@floating-ui/utils": "^0.2.9",
+    "tabbable": "^6.2.0"
+  },
   "devDependencies": {
-    "@floating-ui/dom": "^1.5.4",
-    "@types/node": "^20.11.5",
-    "pridepack": "2.6.0",
-    "solid-js": "^1.8.11",
-    "tslib": "^2.6.0",
-    "typescript": "^5.3.3"
+    "@floating-ui/dom": "^1.7.4",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^24.7.0",
+    "solid-js": "^1.9.9",
+    "tsdown": "^0.22.14",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9",
+    "vite-plugin-solid": "^2.11.9"
   },
   "peerDependencies": {
     "@floating-ui/dom": "^1.5",
     "solid-js": "^1.8"
   },
-  "scripts": {
-    "prepublishOnly": "pridepack clean && pridepack build",
-    "build": "pridepack build",
-    "type-check": "pridepack check",
-    "clean": "pridepack clean",
-    "watch": "pridepack watch",
-    "start": "pridepack start",
-    "dev": "pridepack dev",
-    "test": "vitest"
-  },
-  "private": false,
-  "description": "SolidJS bindings for Floating UI",
-  "repository": {
-    "url": "https://github.com/lxsmnsyc/solid-floating-ui.git",
-    "type": "git"
-  },
-  "homepage": "https://github.com/lxsmnsyc/solid-floating-ui/tree/main/packages/solid-floating-ui",
-  "bugs": {
-    "url": "https://github.com/lxsmnsyc/solid-floating-ui/issues"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "author": "Alexis Munsayac",
-  "exports": {
-    ".": {
-      "development": {
-        "require": "./dist/cjs/development/index.cjs",
-        "import": "./dist/esm/development/index.mjs"
-      },
-      "require": "./dist/cjs/production/index.cjs",
-      "import": "./dist/esm/production/index.mjs",
-      "types": "./dist/types/index.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {}
-  },
-  "types": "./dist/types/index.d.ts",
-  "main": "./dist/cjs/production/index.cjs",
-  "module": "./dist/esm/production/index.mjs"
+  "engines": {
+    "node": ">=18"
+  }
 }
