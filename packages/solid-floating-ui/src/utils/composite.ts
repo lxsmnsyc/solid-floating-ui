@@ -3,18 +3,21 @@ import { floor } from '@floating-ui/utils';
 import { DEV } from 'solid-js';
 import { ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP } from './constants';
 import { stopEvent } from './event';
-import type { Ref } from './ref';
 
 export type DisabledIndices = number[] | ((index: number) => boolean);
 
-export type ListRef = Ref<(HTMLElement | null)[]>;
+/**
+ * Reads the list items in index order. The library only ever reads them, so an
+ * accessor is enough and there is no container to keep in sync.
+ */
+export type ListRef = () => (HTMLElement | null)[];
 
 export function isDifferentGridRow(index: number, cols: number, prevRow: number): boolean {
   return Math.floor(index / cols) !== prevRow;
 }
 
 export function isIndexOutOfListBounds(listRef: ListRef, index: number): boolean {
-  return index < 0 || index >= listRef.current.length;
+  return index < 0 || index >= listRef().length;
 }
 
 export function getMinListIndex(
@@ -30,7 +33,7 @@ export function getMaxListIndex(
 ): number {
   return findNonDisabledListIndex(listRef, {
     decrement: true,
-    startingIndex: listRef.current.length,
+    startingIndex: listRef().length,
     disabledIndices,
   });
 }
@@ -54,7 +57,7 @@ export function findNonDisabledListIndex(
     index += decrement ? -amount : amount;
   } while (
     index >= 0 &&
-    index <= listRef.current.length - 1 &&
+    index <= listRef().length - 1 &&
     isListIndexDisabled(listRef, index, disabledIndices)
   );
 
@@ -327,7 +330,7 @@ export function isListIndexDisabled(
     return disabledIndices.includes(index);
   }
 
-  const element = listRef.current[index];
+  const element = listRef()[index];
   return (
     element == null ||
     element.hasAttribute('disabled') ||

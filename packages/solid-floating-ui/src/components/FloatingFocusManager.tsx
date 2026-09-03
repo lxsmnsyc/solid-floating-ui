@@ -16,7 +16,6 @@ import { isVirtualClick, isVirtualPointerEvent, stopEvent } from '../utils/event
 import { markOthers, supportsInert } from '../utils/markOthers';
 import { getNodeAncestors, getNodeChildren } from '../utils/nodes';
 import { createCleanupEffect } from '../utils/reactivity';
-import type { Ref } from '../utils/ref';
 import {
   getNextTabbable,
   getPreviousTabbable,
@@ -124,10 +123,10 @@ export interface FloatingFocusManagerProps {
   order?: FocusOrder[] | undefined;
   /**
    * Which element to initially focus. Can be either a number (tabbable index as
-   * specified by the `order`) or a ref.
+   * specified by the `order`) or an accessor returning the element.
    * @default 0
    */
-  initialFocus?: number | Ref<HTMLElement | null> | undefined;
+  initialFocus?: number | (() => HTMLElement | null) | undefined;
   /**
    * Determines if the focus guards are rendered. If not, focus can escape into
    * the address bar, console or browser UI, like in native dialogs.
@@ -138,11 +137,11 @@ export interface FloatingFocusManagerProps {
    * Determines if focus should be returned to the reference element once the
    * floating element closes or unmounts (or, if that is not available, the
    * previously focused element). Ignored if the floating element lost focus.
-   * Can also be set to a ref to explicitly control the element to return focus
-   * to.
+   * Can also be set to an accessor to explicitly control the element to return
+   * focus to.
    * @default true
    */
-  returnFocus?: boolean | Ref<HTMLElement | null> | undefined;
+  returnFocus?: boolean | (() => HTMLElement | null) | undefined;
   /**
    * Determines if focus should be restored to the nearest tabbable element if
    * focus inside the floating element is lost, such as when the currently
@@ -193,8 +192,8 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
 
   const disabled = (): boolean => props.disabled ?? false;
   const order = (): FocusOrder[] => props.order ?? ['content'];
-  const initialFocus = (): number | Ref<HTMLElement | null> => props.initialFocus ?? 0;
-  const returnFocus = (): boolean | Ref<HTMLElement | null> => props.returnFocus ?? true;
+  const initialFocus = (): number | (() => HTMLElement | null) => props.initialFocus ?? 0;
+  const returnFocus = (): boolean | (() => HTMLElement | null) => props.returnFocus ?? true;
   const restoreFocus = (): boolean => props.restoreFocus ?? false;
   const modal = (): boolean => props.modal ?? true;
   const visuallyHiddenDismiss = (): boolean | string => props.visuallyHiddenDismiss ?? false;
@@ -530,7 +529,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
       const requestedFocus =
         typeof initialFocusValue === 'number'
           ? focusableElements[initialFocusValue]
-          : initialFocusValue.current;
+          : initialFocusValue();
       const elToFocus = requestedFocus ?? focusElement;
       const focusAlreadyInsideFloatingEl = contains(focusElement, previouslyFocusedElement);
 
@@ -625,7 +624,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
         return el?.isConnected ? el : fallbackEl;
       }
 
-      return value.current ?? fallbackEl;
+      return value() ?? fallbackEl;
     }
 
     return () => {

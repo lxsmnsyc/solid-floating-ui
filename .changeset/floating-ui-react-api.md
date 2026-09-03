@@ -8,6 +8,7 @@
 - `safePolygon`, `inner`, `useInnerOffset`, `useTransitionStatus`, `useTransitionStyles`, `useId` and `useMergeRefs` are exported as well.
 - A `solid-floating-ui/utils` entry point exposes the DOM helpers Floating UI ships alongside its React package.
 - Options and returned values are reactive getters rather than values captured on render, so no dependency arrays are needed anywhere.
-- Mutable containers such as `listRef` are created with the exported `createRef()`.
+- Options the library only reads, such as `listRef`, the `arrow` element, a portal `root` and the focus manager's `initialFocus` and `returnFocus`, take an accessor instead of a ref.
+- Containers the library writes into, such as `FloatingList`'s `elementsRef`, are created with the exported `createRef()`.
 - `Composite` and `CompositeItem` accept a `render` callback only, since SolidJS has no `cloneElement`.
 - Prop getters produce SolidJS event names, so `onFocusIn` and `onFocusOut` stand in for React's bubbling `onFocus` and `onBlur`.

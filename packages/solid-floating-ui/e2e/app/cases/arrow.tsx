@@ -1,13 +1,13 @@
-import { FloatingArrow, arrow, createRef, offset, useFloating } from 'solid-floating-ui';
-import type { JSX } from 'solid-js';
+import { FloatingArrow, arrow, offset, useFloating } from 'solid-floating-ui';
+import { type JSX, createSignal } from 'solid-js';
 
 export default function ArrowCase(): JSX.Element {
-  const arrowRef = createRef<Element | null>(null);
+  const [arrowElement, setArrowElement] = createSignal<Element | null>(null);
 
   const floating = useFloating({
     open: true,
     placement: 'bottom',
-    middleware: [offset(12), arrow({ element: arrowRef })],
+    middleware: [offset(12), arrow({ element: arrowElement })],
   });
 
   return (
@@ -32,7 +32,7 @@ export default function ArrowCase(): JSX.Element {
         Floating
         <FloatingArrow
           ref={(element: SVGSVGElement) => {
-            arrowRef.current = element;
+            setArrowElement(element);
           }}
           context={floating.context}
           data-testid="arrow"

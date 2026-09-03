@@ -1,23 +1,18 @@
 import type { Derivable, Middleware, Padding } from '@floating-ui/dom';
 import { arrow as arrowCore } from '@floating-ui/dom';
-import type { Ref } from './utils/ref';
 
 export interface ArrowOptions {
   /**
-   * The arrow element to be positioned, or a ref holding it.
+   * The arrow element to be positioned, or an accessor returning it.
    * @default undefined
    */
-  element: Ref<Element | null> | Element | null;
+  element: (() => Element | null) | Element | null;
   /**
    * The padding between the arrow element and the floating element edges.
    * Useful when the floating element has rounded corners.
    * @default 0
    */
   padding?: Padding | undefined;
-}
-
-function isRef(value: unknown): value is Ref<Element | null> {
-  return value != null && Object.hasOwn(value, 'current');
 }
 
 /**
@@ -33,9 +28,10 @@ export function arrow(options: ArrowOptions | Derivable<ArrowOptions>): Middlewa
     fn(state): ReturnType<Middleware['fn']> {
       const { element, padding } = typeof options === 'function' ? options(state) : options;
 
-      if (element && isRef(element)) {
-        if (element.current != null) {
-          return arrowCore({ element: element.current, padding }).fn(state);
+      if (typeof element === 'function') {
+        const resolved = element();
+        if (resolved != null) {
+          return arrowCore({ element: resolved, padding }).fn(state);
         }
 
         return {};

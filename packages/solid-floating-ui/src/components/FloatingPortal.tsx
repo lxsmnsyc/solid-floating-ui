@@ -1,4 +1,3 @@
-import { isNode } from '@floating-ui/utils/dom';
 import {
   type Accessor,
   type JSX,
@@ -60,20 +59,21 @@ const PortalContext = createContext<PortalContextValue | null>(null);
 const attr = createAttribute('portal');
 
 /**
- * A portal root may be given directly or through a ref.
+ * A portal root may be given directly or through an accessor, which defers the
+ * lookup until the node exists.
  */
 function resolveRoot(root: PortalRoot): HTMLElement | ShadowRoot | null {
   if (root == null) {
     return null;
   }
-  return isNode(root) ? root : root.current;
+  return typeof root === 'function' ? root() : root;
 }
 
 export type PortalRoot =
   | HTMLElement
   | ShadowRoot
   | null
-  | Ref<HTMLElement | ShadowRoot | null>
+  | (() => HTMLElement | ShadowRoot | null)
   | undefined;
 
 export interface UseFloatingPortalNodeProps {

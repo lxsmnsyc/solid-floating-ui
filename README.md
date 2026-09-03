@@ -98,6 +98,20 @@ The same holds for what the hooks return. `floating.placement`,
 `floating.floatingStyles` and `floating.context.open` are live reads, so using
 them inside JSX keeps the markup up to date without any extra wiring.
 
+### Documentation
+
+The [`docs/`](docs/) directory covers the whole surface:
+
+- [Getting started](docs/getting-started.md)
+- [Reactivity](docs/reactivity.md)
+- [Positioning](docs/positioning.md)
+- [Interactions](docs/interactions.md)
+- [Components](docs/components.md)
+- [Transitions](docs/transitions.md)
+- [Utilities](docs/utilities.md)
+- [Recipes](docs/recipes.md)
+- [Migrating from `@floating-ui/react`](docs/migrating-from-react.md)
+
 ### What is included
 
 Positioning:
@@ -122,15 +136,17 @@ Components:
 Utilities:
 
 - `useId`, `useMergeRefs`, `useTransitionStatus`, `useTransitionStyles`
-- `createRef` for the `{ current }` containers the hooks share, such as
-  `listRef` and `elementsRef`
+- `createRef` for the `{ current }` containers the library writes into, such as
+  `elementsRef`
 - `solid-floating-ui/utils` for the DOM helpers Floating UI exposes
 
 ### Differences from `@floating-ui/react`
 
 - Options and returned values are reactive getters rather than values captured
   on render, so there is no dependency array anywhere.
-- Mutable containers are created with `createRef()` instead of `useRef()`.
+- Anything the library only reads, such as `listRef` or an arrow element, is an
+  accessor rather than a ref. `createRef()` is left for the containers the
+  library writes into, such as `FloatingList`'s `elementsRef`.
 - `Composite` and `CompositeItem` take a `render` callback only, because
   SolidJS has no `cloneElement`.
 - Prop getters produce SolidJS event names, so `onFocusIn` and `onFocusOut`

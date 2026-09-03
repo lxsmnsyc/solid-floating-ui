@@ -58,7 +58,7 @@ export interface InnerProps extends DetectOverflowOptions {
    * elements as direct children without being interfered with by scrolling
    * layout.
    */
-  scrollRef?: Ref<HTMLElement | null> | undefined;
+  scrollRef?: (() => HTMLElement | null) | undefined;
   /**
    * The minimum number of items that should be visible in the list.
    * @default 4
@@ -98,8 +98,8 @@ export const inner = (props: InnerProps | Derivable<InnerProps>): Middleware => 
       elements: { floating },
     } = state;
 
-    const item = listRef.current[index];
-    const scrollEl = scrollRef?.current ?? floating;
+    const item = listRef()[index];
+    const scrollEl = scrollRef?.() ?? floating;
 
     // Valid combinations:
     // 1. Floating element is the `scrollRef` and has a border (default)
@@ -164,8 +164,7 @@ export const inner = (props: InnerProps | Derivable<InnerProps>): Middleware => 
     // There is not enough space, fall back to standard anchored positioning.
     if (onFallbackChange) {
       const shouldFallback =
-        scrollEl.offsetHeight <
-          item.offsetHeight * min(minItemsVisible, listRef.current.length) - 1 ||
+        scrollEl.offsetHeight < item.offsetHeight * min(minItemsVisible, listRef().length) - 1 ||
         refOverflow.top >= -referenceOverflowThreshold ||
         refOverflow.bottom >= -referenceOverflowThreshold;
 
@@ -203,7 +202,7 @@ export interface UseInnerOffsetProps {
    * An optional ref containing an `HTMLElement` used as the scrolling
    * container instead of the floating element.
    */
-  scrollRef?: Ref<HTMLElement | null> | undefined;
+  scrollRef?: (() => HTMLElement | null) | undefined;
   /**
    * Callback invoked when the offset changes.
    */
@@ -229,7 +228,7 @@ export function useInnerOffset(
       return undefined;
     }
 
-    const el = props.scrollRef?.current ?? context.elements.floating;
+    const el = props.scrollRef?.() ?? context.elements.floating;
 
     function onWheel(event: WheelEvent): void {
       if (event.ctrlKey || !el || props.overflowRef.current == null) {
@@ -285,7 +284,7 @@ export function useInnerOffset(
       controlledScrolling = false;
     },
     onScroll() {
-      const el = props.scrollRef?.current ?? context.elements.floating;
+      const el = props.scrollRef?.() ?? context.elements.floating;
 
       if (!props.overflowRef.current || !el || !controlledScrolling) {
         return;

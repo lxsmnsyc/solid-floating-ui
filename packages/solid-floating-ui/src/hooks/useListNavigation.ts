@@ -338,7 +338,7 @@ export function useListNavigation(
       }
     }
 
-    const initialItem = listRef.current[index];
+    const initialItem = listRef()[index];
     const shouldForceScrollIntoView = forceScrollIntoView;
 
     if (initialItem) {
@@ -352,7 +352,7 @@ export function useListNavigation(
       : requestAnimationFrame;
 
     scheduler(() => {
-      const waitedItem = listRef.current[index] ?? initialItem;
+      const waitedItem = listRef()[index] ?? initialItem;
 
       if (!waitedItem) {
         return;
@@ -438,7 +438,7 @@ export function useListNavigation(
       ) {
         let runs = 0;
         const waitForListPopulated = (): void => {
-          if (props.listRef.current[0] == null) {
+          if (props.listRef()[0] == null) {
             // Avoid letting the browser paint if possible on the first try,
             // otherwise use rAF. Don't try more than twice, since something
             // is wrong otherwise.
@@ -531,7 +531,7 @@ export function useListNavigation(
     if (!context.open) {
       return;
     }
-    const nextIndex = props.listRef.current.indexOf(currentTarget);
+    const nextIndex = props.listRef().indexOf(currentTarget);
     if (nextIndex !== -1 && index !== nextIndex) {
       index = nextIndex;
       onNavigate();
@@ -649,7 +649,7 @@ export function useListNavigation(
     if (currentCols > 1) {
       const sizes =
         props.itemSizes ??
-        Array.from({ length: listRef.current.length }, () => ({
+        Array.from({ length: listRef().length }, () => ({
           width: 1,
           height: 1,
         }));
@@ -674,11 +674,7 @@ export function useListNavigation(
       const nextIndex =
         cellMap[
           getGridNavigatedIndex(
-            {
-              current: cellMap.map((itemIndex) =>
-                itemIndex == null ? null : listRef.current[itemIndex]!,
-              ),
-            },
+            () => cellMap.map((itemIndex) => (itemIndex == null ? null : listRef()[itemIndex]!)),
             {
               event,
               orientation: currentOrientation,
@@ -690,7 +686,7 @@ export function useListNavigation(
               disabledIndices: getGridCellIndices(
                 [
                   ...(explicitDisabledIndices ??
-                    listRef.current.map((_, itemIndex) =>
+                    listRef().map((_, itemIndex) =>
                       isListIndexDisabled(listRef, itemIndex, disabledIndices)
                         ? itemIndex
                         : undefined,
@@ -751,7 +747,7 @@ export function useListNavigation(
               startingIndex: currentIndex,
               disabledIndices,
             });
-          } else if (allowEscape() && currentIndex !== listRef.current.length) {
+          } else if (allowEscape() && currentIndex !== listRef().length) {
             // Escaping the list leaves nothing selected.
             index = -1;
           } else {
@@ -775,7 +771,7 @@ export function useListNavigation(
           });
         } else if (allowEscape() && currentIndex !== -1) {
           // Escaping past the start parks the index beyond the last item.
-          index = listRef.current.length;
+          index = listRef().length;
         } else {
           index = maxIndex;
         }
@@ -876,7 +872,7 @@ export function useListNavigation(
               if (isCrossCloseKey && !isCurrentTarget) {
                 dispatchItem = deepestNode.context?.elements.domReference;
               } else if (isCrossOpenKey) {
-                dispatchItem = listRef.current.find((listItem) => listItem?.id === activeId());
+                dispatchItem = listRef().find((listItem) => listItem?.id === activeId());
               }
 
               if (dispatchItem) {

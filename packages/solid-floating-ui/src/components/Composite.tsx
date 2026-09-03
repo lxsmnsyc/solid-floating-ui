@@ -11,6 +11,7 @@ import { useMergeRefs } from '../hooks/useMergeRefs';
 import type { AnyElementProps } from '../types';
 import {
   type DisabledIndices,
+  type ListRef,
   createGridCellMap,
   findNonDisabledListIndex,
   getGridCellIndexOfCorner,
@@ -160,6 +161,8 @@ export function Composite(props: CompositeProps): JSX.Element {
   }
 
   const elementsRef = createRef<(HTMLElement | null)[]>([]);
+  // `FloatingList` fills the container in, and the navigation helpers read it.
+  const listRef: ListRef = () => elementsRef.current;
 
   function handleKeyDown(event: KeyboardEvent): void {
     if (!allKeys.includes(event.key)) {
@@ -174,8 +177,8 @@ export function Composite(props: CompositeProps): JSX.Element {
     const isGrid = currentCols > 1;
 
     let nextIndex = currentActiveIndex;
-    const minIndex = getMinListIndex(elementsRef, disabledIndices);
-    const maxIndex = getMaxListIndex(elementsRef, disabledIndices);
+    const minIndex = getMinListIndex(listRef, disabledIndices);
+    const maxIndex = getMaxListIndex(listRef, disabledIndices);
 
     const horizontalEndKey = currentRtl ? ARROW_LEFT : ARROW_RIGHT;
     const horizontalStartKey = currentRtl ? ARROW_RIGHT : ARROW_LEFT;
@@ -183,7 +186,7 @@ export function Composite(props: CompositeProps): JSX.Element {
     if (isGrid) {
       const sizes =
         local.itemSizes ??
-        Array.from({ length: elementsRef.current.length }, () => ({
+        Array.from({ length: listRef().length }, () => ({
           width: 1,
           height: 1,
         }));
@@ -193,12 +196,12 @@ export function Composite(props: CompositeProps): JSX.Element {
       const explicitDisabledIndices =
         typeof disabledIndices === 'function' ? undefined : disabledIndices;
       const minGridIndex = cellMap.findIndex(
-        (index) => index != null && !isListIndexDisabled(elementsRef, index, disabledIndices),
+        (index) => index != null && !isListIndexDisabled(listRef, index, disabledIndices),
       );
       // Last enabled index.
       const maxGridIndex = cellMap.reduce(
         (foundIndex: number, index, cellIndex) =>
-          index != null && !isListIndexDisabled(elementsRef, index, disabledIndices)
+          index != null && !isListIndexDisabled(listRef, index, disabledIndices)
             ? cellIndex
             : foundIndex,
         -1,
@@ -207,11 +210,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       const maybeNextIndex =
         cellMap[
           getGridNavigatedIndex(
-            {
-              current: cellMap.map((itemIndex) =>
-                itemIndex ? (elementsRef.current[itemIndex] ?? null) : null,
-              ),
-            },
+            () => cellMap.map((itemIndex) => (itemIndex ? (listRef()[itemIndex] ?? null) : null)),
             {
               event,
               orientation: currentOrientation,
@@ -223,8 +222,8 @@ export function Composite(props: CompositeProps): JSX.Element {
               disabledIndices: getGridCellIndices(
                 [
                   ...(explicitDisabledIndices ??
-                    elementsRef.current.map((_, index) =>
-                      isListIndexDisabled(elementsRef, index, disabledIndices) ? index : undefined,
+                    listRef().map((_, index) =>
+                      isListIndexDisabled(listRef, index, disabledIndices) ? index : undefined,
                     )),
                   undefined,
                 ],
@@ -274,7 +273,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       } else if (loop() && nextIndex === minIndex && toStartKeys.includes(event.key)) {
         nextIndex = maxIndex;
       } else {
-        nextIndex = findNonDisabledListIndex(elementsRef, {
+        nextIndex = findNonDisabledListIndex(listRef, {
           startingIndex: nextIndex,
           decrement: toStartKeys.includes(event.key),
           disabledIndices,
@@ -282,7 +281,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       }
     }
 
-    if (nextIndex !== currentActiveIndex && !isIndexOutOfListBounds(elementsRef, nextIndex)) {
+    if (nextIndex !== currentActiveIndex && !isIndexOutOfListBounds(listRef, nextIndex)) {
       event.stopPropagation();
 
       if (preventedKeys.includes(event.key)) {
@@ -290,7 +289,7 @@ export function Composite(props: CompositeProps): JSX.Element {
       }
 
       onNavigate(nextIndex);
-      elementsRef.current[nextIndex]?.focus();
+      listRef()[nextIndex]?.focus();
     }
   }
 

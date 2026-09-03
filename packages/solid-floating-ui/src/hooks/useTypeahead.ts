@@ -1,7 +1,6 @@
 import { createRenderEffect } from 'solid-js';
 import type { AnyElementProps, ElementProps, FloatingRootContext } from '../types';
 import { stopEvent } from '../utils/event';
-import type { Ref } from '../utils/ref';
 import { clearTimeoutIfSet } from '../utils/schedule';
 
 export interface UseTypeaheadProps {
@@ -10,7 +9,7 @@ export interface UseTypeaheadProps {
    * elements of the list.
    * @default empty list
    */
-  listRef: Ref<(string | null)[]>;
+  listRef: () => (string | null)[];
   /**
    * The index of the active (focused or highlighted) item in the list.
    * @default null
@@ -110,7 +109,7 @@ export function useTypeahead(context: FloatingRootContext, props: UseTypeaheadPr
       return str ? list.indexOf(str) : -1;
     }
 
-    const listContent = props.listRef.current;
+    const listContent = props.listRef();
 
     if (typedString.length > 0 && typedString[0] !== ' ') {
       if (getMatchingIndex(listContent, listContent, typedString) === -1) {

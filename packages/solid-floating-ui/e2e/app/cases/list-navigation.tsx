@@ -37,7 +37,7 @@ export default function ListNavigationCase(): JSX.Element {
     useDismiss(floating.context),
     useRole(floating.context, { role: 'listbox' }),
     useListNavigation(floating.context, {
-      listRef: elementsRef,
+      listRef: () => elementsRef.current,
       get activeIndex() {
         return activeIndex();
       },
@@ -47,7 +47,7 @@ export default function ListNavigationCase(): JSX.Element {
       loop: true,
     }),
     useTypeahead(floating.context, {
-      listRef: labelsRef,
+      listRef: () => labelsRef.current,
       get activeIndex() {
         return activeIndex();
       },
