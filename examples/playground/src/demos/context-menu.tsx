@@ -10,11 +10,11 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { For, Show, createSignal } from 'solid-js';
+import { For, type JSX, Show, createSignal } from 'solid-js';
 
 const ACTIONS = ['Cut', 'Copy', 'Paste', 'Delete'];
 
-export default function ContextMenuDemo() {
+export default function ContextMenuDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);
   const [point, setPoint] = createSignal({ x: 0, y: 0 });
   const [chosen, setChosen] = createSignal('nothing yet');

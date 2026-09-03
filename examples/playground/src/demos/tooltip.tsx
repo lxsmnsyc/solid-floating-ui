@@ -11,9 +11,9 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { Show, createSignal } from 'solid-js';
+import { type JSX, Show, createSignal } from 'solid-js';
 
-function Tooltip(props: { label: string; delay: number; children: string }) {
+function Tooltip(props: { label: string; delay: number; children: string }): JSX.Element {
   const [open, setOpen] = createSignal(false);
 
   const floating = useFloating({
@@ -70,7 +70,7 @@ function Tooltip(props: { label: string; delay: number; children: string }) {
   );
 }
 
-export default function TooltipDemo() {
+export default function TooltipDemo(): JSX.Element {
   const [delay, setDelay] = createSignal(300);
 
   return (

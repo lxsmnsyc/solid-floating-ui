@@ -10,9 +10,9 @@ import {
   useRole,
   useTransitionStyles,
 } from 'solid-floating-ui';
-import { Show, createSignal } from 'solid-js';
+import { type JSX, Show, createSignal } from 'solid-js';
 
-export default function TransitionDemo() {
+export default function TransitionDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);
   const [duration, setDuration] = createSignal(250);
 

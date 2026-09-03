@@ -18,7 +18,7 @@ import {
   useTypeahead,
 } from 'solid-floating-ui';
 import type { UseInteractionsReturn } from 'solid-floating-ui';
-import { For, Show, createSignal } from 'solid-js';
+import { For, type JSX, Show, createSignal } from 'solid-js';
 
 const FRUITS = [
   'Apple',
@@ -41,15 +41,15 @@ function Option(props: {
   selectedIndex: number | null;
   getItemProps: UseInteractionsReturn['getItemProps'];
   onSelect: (index: number) => void;
-}) {
+}): JSX.Element {
   const listItem = useListItem({
     get label() {
       return props.label;
     },
   });
 
-  const isActive = () => listItem.index === props.activeIndex;
-  const isSelected = () => listItem.index === props.selectedIndex;
+  const isActive = (): boolean => listItem.index === props.activeIndex;
+  const isSelected = (): boolean => listItem.index === props.selectedIndex;
 
   return (
     <div
@@ -74,7 +74,7 @@ function Option(props: {
   );
 }
 
-export default function SelectDemo() {
+export default function SelectDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
   const [selectedIndex, setSelectedIndex] = createSignal<number | null>(null);
@@ -134,12 +134,12 @@ export default function SelectDemo() {
     }),
   ]);
 
-  function select(index: number) {
+  function select(index: number): void {
     setSelectedIndex(index);
     setOpen(false);
   }
 
-  const selectedLabel = () => {
+  const selectedLabel = (): string | undefined => {
     const index = selectedIndex();
     return index == null ? 'Pick a fruit' : FRUITS[index];
   };

@@ -1,10 +1,10 @@
 import { Composite, CompositeItem } from 'solid-floating-ui';
-import { For, createSignal } from 'solid-js';
+import { For, type JSX, createSignal } from 'solid-js';
 
 const TOOLS = ['Bold', 'Italic', 'Underline', 'Strike'];
 const CELLS = Array.from({ length: 12 }, (_, index) => index + 1);
 
-export default function CompositeDemo() {
+export default function CompositeDemo(): JSX.Element {
   const [pressed, setPressed] = createSignal('nothing yet');
 
   return (

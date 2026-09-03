@@ -13,11 +13,11 @@ import {
   useRole,
   useTransitionStyles,
 } from 'solid-floating-ui';
-import { For, Show, createSignal } from 'solid-js';
+import { For, type JSX, Show, createSignal } from 'solid-js';
 
 const ACTIONS = ['Undo', 'Redo', 'Cut', 'Copy', 'Paste'];
 
-function GroupedTooltip(props: { label: string }) {
+function GroupedTooltip(props: { label: string }): JSX.Element {
   const [open, setOpen] = createSignal(false);
 
   const floating = useFloating({
@@ -82,7 +82,7 @@ function GroupedTooltip(props: { label: string }) {
   );
 }
 
-export default function DelayGroupDemo() {
+export default function DelayGroupDemo(): JSX.Element {
   return (
     <>
       <div class="stage">

@@ -11,15 +11,15 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { Show, createSignal, onCleanup } from 'solid-js';
+import { type JSX, Show, createSignal, onCleanup } from 'solid-js';
 
-export default function PopoverDemo() {
+export default function PopoverDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);
   const [modal, setModal] = createSignal(false);
   const [name, setName] = createSignal('');
   const [focused, setFocused] = createSignal('nothing');
 
-  function onFocusIn(event: FocusEvent) {
+  function onFocusIn(event: FocusEvent): void {
     const target = event.target;
     setFocused(target instanceof HTMLElement ? (target.dataset.name ?? 'nothing') : 'nothing');
   }

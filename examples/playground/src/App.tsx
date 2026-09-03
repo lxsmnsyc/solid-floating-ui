@@ -1,15 +1,15 @@
-import { For, Show, createSignal, onCleanup } from 'solid-js';
+import { For, type JSX, Show, createSignal, onCleanup } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
-import { DEMOS } from './demos';
+import { DEMOS, type DemoEntry } from './demos';
 
-function currentId() {
+function currentId(): string {
   return window.location.hash.slice(1) || DEMOS[0].id;
 }
 
-export default function App() {
+export default function App(): JSX.Element {
   const [id, setId] = createSignal(currentId());
 
-  function onHashChange() {
+  function onHashChange(): void {
     setId(currentId());
   }
 
@@ -18,7 +18,7 @@ export default function App() {
     window.removeEventListener('hashchange', onHashChange);
   });
 
-  const demo = () => DEMOS.find((entry) => entry.id === id()) ?? DEMOS[0];
+  const demo = (): DemoEntry => DEMOS.find((entry) => entry.id === id()) ?? DEMOS[0];
 
   return (
     <div class="layout">

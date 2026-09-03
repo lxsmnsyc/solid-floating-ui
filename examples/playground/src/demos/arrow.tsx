@@ -7,11 +7,11 @@ import {
   shift,
   useFloating,
 } from 'solid-floating-ui';
-import { For, createSignal } from 'solid-js';
+import { For, type JSX, createSignal } from 'solid-js';
 
 const PLACEMENTS: Placement[] = ['top', 'right', 'bottom', 'left'];
 
-export default function ArrowDemo() {
+export default function ArrowDemo(): JSX.Element {
   const [placement, setPlacement] = createSignal<Placement>('top');
   const [arrowElement, setArrowElement] = createSignal<Element | null>(null);
 

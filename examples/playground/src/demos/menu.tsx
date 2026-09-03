@@ -33,7 +33,7 @@ interface MenuContextValue {
 
 const MenuContext = createContext<MenuContextValue>();
 
-export function MenuItem(props: { label: string; onSelect?: () => void }) {
+export function MenuItem(props: { label: string; onSelect?: () => void }): JSX.Element {
   const menu = useContext(MenuContext);
   const listItem = useListItem({
     get label() {
@@ -41,7 +41,7 @@ export function MenuItem(props: { label: string; onSelect?: () => void }) {
     },
   });
 
-  const isActive = () => listItem.index === menu?.activeIndex;
+  const isActive = (): boolean => listItem.index === menu?.activeIndex;
 
   return (
     <div
@@ -63,10 +63,10 @@ export function MenuItem(props: { label: string; onSelect?: () => void }) {
   );
 }
 
-export function Menu(props: { label: string; children: JSX.Element }) {
+export function Menu(props: { label: string; children: JSX.Element }): JSX.Element {
   const nodeId = useFloatingNodeId();
   const parentId = useFloatingParentNodeId();
-  const isNested = () => parentId !== null;
+  const isNested = (): boolean => parentId !== null;
 
   const [open, setOpen] = createSignal(false);
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
@@ -152,7 +152,7 @@ export function Menu(props: { label: string; children: JSX.Element }) {
     },
   };
 
-  const isActiveItem = () => listItem.index === parent?.activeIndex;
+  const isActiveItem = (): boolean => listItem.index === parent?.activeIndex;
 
   return (
     <FloatingNode id={nodeId}>
@@ -216,7 +216,7 @@ export function Menu(props: { label: string; children: JSX.Element }) {
   );
 }
 
-export default function MenuDemo() {
+export default function MenuDemo(): JSX.Element {
   const [chosen, setChosen] = createSignal('nothing yet');
 
   return (

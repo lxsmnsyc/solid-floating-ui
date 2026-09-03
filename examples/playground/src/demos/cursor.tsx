@@ -11,13 +11,13 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { For, Show, createSignal } from 'solid-js';
+import { For, type JSX, Show, createSignal } from 'solid-js';
 
 type Axis = 'both' | 'x' | 'y';
 
 const AXES: Axis[] = ['both', 'x', 'y'];
 
-export default function CursorDemo() {
+export default function CursorDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);
   const [axis, setAxis] = createSignal<Axis>('x');
 

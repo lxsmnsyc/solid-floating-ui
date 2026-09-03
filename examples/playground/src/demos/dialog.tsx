@@ -8,9 +8,9 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { Show, createSignal } from 'solid-js';
+import { type JSX, Show, createSignal } from 'solid-js';
 
-export default function DialogDemo() {
+export default function DialogDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);
   const [lockScroll, setLockScroll] = createSignal(true);
 

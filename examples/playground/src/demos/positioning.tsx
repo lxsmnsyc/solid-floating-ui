@@ -1,5 +1,5 @@
 import { type Placement, autoUpdate, flip, offset, shift, useFloating } from 'solid-floating-ui';
-import { For, createSignal } from 'solid-js';
+import { For, type JSX, createSignal } from 'solid-js';
 
 const PLACEMENTS: Placement[] = [
   'top',
@@ -16,7 +16,7 @@ const PLACEMENTS: Placement[] = [
   'left-end',
 ];
 
-export default function PositioningDemo() {
+export default function PositioningDemo(): JSX.Element {
   const [placement, setPlacement] = createSignal<Placement>('bottom');
   const [distance, setDistance] = createSignal(8);
   const [useFlip, setUseFlip] = createSignal(true);
