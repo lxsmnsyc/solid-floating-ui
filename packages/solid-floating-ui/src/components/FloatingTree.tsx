@@ -1,5 +1,11 @@
-import { type JSX, createContext, createSignal, onCleanup, useContext } from 'solid-js';
-import useId from '../hooks/useId';
+import {
+  type JSX,
+  createContext,
+  createSignal,
+  createUniqueId,
+  onCleanup,
+  useContext,
+} from 'solid-js';
 import type { FloatingNodeType, FloatingTreeType } from '../types';
 import createEventEmitter from '../utils/createEventEmitter';
 
@@ -25,7 +31,7 @@ export function useFloatingTree(): FloatingTreeType | null {
  * Registers a node into the `FloatingTree`, returning its id.
  */
 export function useFloatingNodeId(customParentId?: string): string {
-  const id = useId();
+  const id = createUniqueId();
   const tree = useFloatingTree();
   const contextParentId = useFloatingParentNodeId();
   const parentId = customParentId ?? contextParentId;

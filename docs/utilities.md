@@ -1,16 +1,5 @@
 # Utilities
 
-## `useId`
-
-A stable unique id, from `createUniqueId`.
-
-```js
-const id = useId();
-```
-
-The hooks already generate the ids they need, and `context.floatingId` gives
-you the floating element's. Reach for `useId` for your own labelling.
-
 ## `useMergeRefs`
 
 Combines several callback refs into one, for when a component has to hand its

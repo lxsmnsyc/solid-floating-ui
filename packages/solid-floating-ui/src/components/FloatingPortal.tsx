@@ -7,11 +7,11 @@ import {
   createEffect,
   createRenderEffect,
   createSignal,
+  createUniqueId,
   onCleanup,
   useContext,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
-import useId from '../hooks/useId';
 import type { OpenChangeReason } from '../types';
 import { createAttribute } from '../utils/constants';
 import { createCleanupEffect } from '../utils/reactivity';
@@ -123,7 +123,7 @@ export interface UseFloatingPortalNodeProps {
 export function useFloatingPortalNode(
   props: UseFloatingPortalNodeProps = {},
 ): Accessor<HTMLElement | null> {
-  const uniqueId = useId();
+  const uniqueId = createUniqueId();
   const portalContext = usePortalContext();
 
   const [portalNode, setPortalNode] = createSignal<HTMLElement | null>(null);

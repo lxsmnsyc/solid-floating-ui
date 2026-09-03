@@ -1,10 +1,9 @@
 import { isElement } from '@floating-ui/utils/dom';
-import { DEV, createSignal, untrack } from 'solid-js';
+import { DEV, createSignal, createUniqueId, untrack } from 'solid-js';
 import { useFloatingParentNodeId } from '../components/FloatingTree';
 import type { ContextData, FloatingRootContext, OpenChangeReason, ReferenceType } from '../types';
 import createEventEmitter from '../utils/createEventEmitter';
 import { error } from '../utils/log';
-import useId from './useId';
 
 export interface UseFloatingRootContextOptions {
   open?: boolean | undefined;
@@ -22,7 +21,7 @@ export interface UseFloatingRootContextOptions {
 export function useFloatingRootContext(
   options: UseFloatingRootContextOptions,
 ): FloatingRootContext {
-  const floatingId = useId();
+  const floatingId = createUniqueId();
   const data: ContextData = {};
   const events = createEventEmitter();
   const nested = useFloatingParentNodeId() != null;

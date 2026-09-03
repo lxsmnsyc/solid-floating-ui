@@ -21,7 +21,7 @@ Reference:
   the delay groups and `Composite`
 - [Transitions](transitions.md) — `useTransitionStatus` and
   `useTransitionStyles`
-- [Utilities](utilities.md) — `useId`, `useMergeRefs` and the
+- [Utilities](utilities.md) — `useMergeRefs` and the
   `solid-floating-ui/utils` entry point
 
 Patterns:
