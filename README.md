@@ -117,13 +117,27 @@ The [`docs/`](docs/) directory covers the whole surface:
 
 ### Claude Code plugin
 
-A plugin with a working recipe for every pattern lives in
-[`plugins/solid-floating-ui`](plugins/solid-floating-ui):
+[`plugins/solid-floating-ui`](plugins/solid-floating-ui) is a Claude Code
+plugin for building these patterns:
 
 ```
 /plugin marketplace add lxsmnsyc/solid-floating-ui
 /plugin install solid-floating-ui@solid-floating-ui
 ```
+
+It adds one skill, `solid-floating-ui`, which loads on its own whenever the work
+involves anchored or overlay UI in a SolidJS project. The skill carries the
+reactivity rules that decide whether the result updates at all, plus a complete
+working recipe for each pattern: tooltip, popover, dialog, select, nested menus,
+context menu, cursor tracking, composite, transitions, delay groups and the
+arrow.
+
+Two commands come with it:
+
+- `/floating-ui-recipe <name>` scaffolds one of those patterns into the current
+  project, matching the conventions already in the codebase.
+- `/floating-ui-audit [path]` reviews existing usage for the mistakes that
+  type-check and render but silently stop updating.
 
 ### What is included
 
@@ -131,7 +145,7 @@ Positioning:
 
 - `useFloating`, `usePosition`, `useFloatingRootContext`
 - The middleware re-exported from `@floating-ui/dom`, plus an `arrow` that
-  accepts a ref
+  accepts an accessor
 
 Interactions, composed through `useInteractions`:
 
