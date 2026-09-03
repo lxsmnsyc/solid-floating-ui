@@ -100,6 +100,9 @@ them inside JSX keeps the markup up to date without any extra wiring.
 
 ### Documentation
 
+Run `pnpm dev` for the [playground](examples/playground), an app
+with a demo of every hook and component.
+
 The [`docs/`](docs/) directory covers the whole surface:
 
 - [Getting started](docs/getting-started.md)

@@ -10,6 +10,7 @@ package is `solid-floating-ui` in [packages/solid-floating-ui](packages/solid-fl
 | Task                | Command                                  |
 | ------------------- | ---------------------------------------- |
 | Build every package | `pnpm build`                             |
+| Run the playground  | `pnpm dev`                               |
 | Run tests           | `pnpm test`                              |
 | Type-check          | `pnpm run type-check`                    |
 | Lint                | `pnpm lint` (`pnpm lint:fix` to autofix) |

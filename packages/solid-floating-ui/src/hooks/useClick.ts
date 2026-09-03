@@ -17,7 +17,7 @@ function isSpaceIgnored(element: Element | null): boolean {
 
 export interface UseClickProps {
   /**
-   * Whether the Hook is enabled, including all internal Effects and event
+   * Whether the hook is enabled, including all internal effects and event
    * handlers.
    * @default true
    */
@@ -47,7 +47,7 @@ export interface UseClickProps {
    */
   keyboardHandlers?: boolean | undefined;
   /**
-   * If already open from another event such as the `useHover()` Hook,
+   * If already open from another event such as the `useHover()` hook,
    * determines whether to keep the floating element open when clicking the
    * reference element for the first time.
    * @default true

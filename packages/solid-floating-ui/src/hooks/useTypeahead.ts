@@ -24,7 +24,7 @@ export interface UseTypeaheadProps {
    */
   onTypingChange?: ((isTyping: boolean) => void) | undefined;
   /**
-   * Whether the Hook is enabled, including all internal Effects and event
+   * Whether the hook is enabled, including all internal effects and event
    * handlers.
    * @default true
    */

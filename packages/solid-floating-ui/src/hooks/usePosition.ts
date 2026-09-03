@@ -134,7 +134,7 @@ export default function usePosition<RT extends ReferenceType = ReferenceType>(
     const floating = floatingEl();
 
     // Read here so the effect re-runs whenever the positioning configuration
-    // changes, the way the React version re-creates `update`.
+    // changes, and not only when the elements themselves do.
     const config = currentConfig();
 
     if (reference) {

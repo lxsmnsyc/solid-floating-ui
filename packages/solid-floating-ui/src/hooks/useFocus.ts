@@ -20,7 +20,7 @@ function isMacSafari(): boolean {
 
 export interface UseFocusProps {
   /**
-   * Whether the Hook is enabled, including all internal Effects and event
+   * Whether the hook is enabled, including all internal effects and event
    * handlers.
    * @default true
    */

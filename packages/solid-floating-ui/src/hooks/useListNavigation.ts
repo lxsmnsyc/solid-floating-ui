@@ -130,7 +130,7 @@ export interface UseListNavigationProps {
    */
   onNavigate?: ((activeIndex: number | null) => void) | undefined;
   /**
-   * Whether the Hook is enabled, including all internal Effects and event
+   * Whether the hook is enabled, including all internal effects and event
    * handlers.
    * @default true
    */
@@ -513,7 +513,8 @@ export function useListNavigation(
     };
   });
 
-  // Runs last so the effects above observe the previous render's values.
+  // Declared last so the effects above still see the values from the previous
+  // run before this one overwrites them.
   createRenderEffect(() => {
     previousOnNavigate = onNavigate;
     previousOpen = context.open;

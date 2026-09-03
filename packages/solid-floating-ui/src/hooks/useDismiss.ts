@@ -53,7 +53,7 @@ export function normalizeProp(
 
 export interface UseDismissProps {
   /**
-   * Whether the Hook is enabled, including all internal Effects and event
+   * Whether the hook is enabled, including all internal effects and event
    * handlers.
    * @default true
    */
@@ -66,7 +66,7 @@ export interface UseDismissProps {
   /**
    * Whether to dismiss the floating element upon pressing the reference
    * element. You likely want to ensure the `move` option in the `useHover()`
-   * Hook has been disabled when this is in use.
+   * hook has been disabled when this is in use.
    * @default false
    */
   referencePress?: boolean | undefined;

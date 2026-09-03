@@ -100,6 +100,9 @@ them inside JSX keeps the markup up to date without any extra wiring.
 
 ### Documentation
 
+Run `pnpm dev` for the [playground](https://github.com/lxsmnsyc/solid-floating-ui/tree/main/examples/playground), an app
+with a demo of every hook and component.
+
 The [`docs/` directory](https://github.com/lxsmnsyc/solid-floating-ui/tree/main/docs) covers the whole surface:
 
 - [Getting started](https://github.com/lxsmnsyc/solid-floating-ui/blob/main/docs/getting-started.md)

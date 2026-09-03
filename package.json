@@ -12,6 +12,7 @@
     "cs:add": "changeset add",
     "cs:pub": "changeset publish",
     "cs:ver": "changeset version",
+    "dev": "pnpm --filter @examples/playground dev",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt --check .",
     "lint": "oxlint --type-aware",

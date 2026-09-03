@@ -27,6 +27,8 @@ Reference:
 
 Patterns:
 
+- [Playground](../examples/playground) — an app with a live demo of every hook
+  and component, run with `pnpm dev`
 - [Recipes](recipes.md) — tooltip, popover, dropdown menu, select, context menu
   and nested menus
 

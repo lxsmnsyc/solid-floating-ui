@@ -71,7 +71,7 @@ export interface FloatingTreeProps {
 /**
  * Provides context for nested floating elements when they are not children of
  * each other on the DOM. It is necessary for:
- * - The `bubbles` option in the `useDismiss()` Hook
+ * - The `bubbles` option in the `useDismiss()` hook
  * - Nested virtual list navigation
  * - Nested floating elements that each open on hover
  * - Custom communication between parent and child floating elements
