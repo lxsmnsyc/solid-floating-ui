@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "solid-floating-ui",
+  "description": "Recipes for building floating elements in SolidJS with solid-floating-ui.",
+  "owner": {
+    "name": "Alexis Munsayac",
+    "url": "https://github.com/lxsmnsyc"
+  },
+  "plugins": [
+    {
+      "name": "solid-floating-ui",
+      "description": "Working recipes for tooltips, popovers, dialogs, selects, menus and more, built on solid-floating-ui.",
+      "source": "./plugins/solid-floating-ui",
+      "category": "development"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "types": ["node", "vite/client"],
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "paths": {
+      "solid-floating-ui": ["../../packages/solid-floating-ui/src/index.ts"],
+      "solid-floating-ui/utils": ["../../packages/solid-floating-ui/src/utils.ts"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

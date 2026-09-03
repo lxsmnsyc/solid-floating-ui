@@ -1,8 +1,8 @@
 # solid-floating-ui
 
-> SolidJS bindings for [Floating UI](https://floating-ui.com/). Based on [`@floating-ui/react-dom`](https://floating-ui.com/docs/react-dom)
+> SolidJS bindings for [Floating UI](https://floating-ui.com/), covering the same surface as [`@floating-ui/react`](https://floating-ui.com/docs/react).
 
-[![NPM](https://img.shields.io/npm/v/solid-floating-ui.svg)](https://www.npmjs.com/package/solid-floating-ui) [![JavaScript Style Guide](https://badgen.net/badge/code%20style/airbnb/ff5a5f?icon=airbnb)](https://github.com/airbnb/javascript)
+[![NPM](https://img.shields.io/npm/v/solid-floating-ui.svg)](https://www.npmjs.com/package/solid-floating-ui)
 
 ## Install
 
@@ -20,127 +20,197 @@ pnpm add @floating-ui/dom solid-floating-ui
 
 ## Usage
 
-```js
-import { createSignal } from 'solid-js';
-import { useFloating } from 'solid-floating-ui';
+`useFloating` positions a floating element against a reference element and
+returns the context every interaction hook and floating component needs.
+
+```jsx
+import { createSignal, Show } from 'solid-js';
+import {
+  autoUpdate,
+  flip,
+  offset,
+  shift,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+  useRole,
+} from 'solid-floating-ui';
 
 function App() {
-  const [reference, setReference] = createSignal();
-  const [floating, setFloating] = createSignal();
+  const [open, setOpen] = createSignal(false);
 
-  // `position` is a reactive object.
-  const position = useFloating(reference, floating);
- 
+  const floating = useFloating({
+    get open() {
+      return open();
+    },
+    onOpenChange: (value) => {
+      setOpen(value);
+    },
+    placement: 'bottom-start',
+    middleware: [offset(8), flip(), shift()],
+    whileElementsMounted: autoUpdate,
+  });
+
+  const interactions = useInteractions([
+    useClick(floating.context),
+    useDismiss(floating.context),
+    useRole(floating.context, { role: 'dialog' }),
+  ]);
+
   return (
     <>
-      <button ref={setReference}>Button</button>
-      <div
-        ref={setFloating}
-        style={{
-          position: position.strategy,
-          top: `${position.y ?? 0}px`,
-          left: `${position.x ?? 0}px`,
-        }}
+      <button
+        {...interactions.getReferenceProps()}
+        ref={(element) => floating.refs.setReference(element)}
       >
-        Tooltip
-      </div>
+        Toggle
+      </button>
+      <Show when={open()}>
+        <div
+          {...interactions.getFloatingProps()}
+          ref={(element) => floating.refs.setFloating(element)}
+          style={floating.floatingStyles}
+        >
+          Floating content
+        </div>
+      </Show>
     </>
   );
 }
 ```
 
-`position` is based on [`computePosition`'s return value](https://floating-ui.com/docs/computeposition#return-value) has the following fields:
+### Options are read reactively
 
-- `x` and `y` are the positioning coords. Initial values are null.
-- `strategy` is either `absolute` (default) or `fixed`. Refer to [`strategy` option](https://floating-ui.com/docs/computeposition#strategy)
-- `placement` is refers to the [`placement` options](https://floating-ui.com/docs/computeposition#placement)
+Every hook takes a plain options object whose properties are read lazily, the
+way SolidJS reads component props. Pass a getter for anything that changes:
 
-Middlewares can also be used:
-
-```js
-import { useFloating } from 'solid-floating-ui';
-import { offset, flip, shift } from '@floating-ui/dom';
-
-const [reference, setReference] = createSignal();
-const [floating, setFloating] = createSignal();
-
-useFloating(reference, floating, {
-  placement: 'right',
-  strategy: 'fixed',
-  middleware: [offset(10), flip(), shift()],
+```jsx
+useHover(floating.context, {
+  get enabled() {
+    return enabled();
+  },
+  delay: { open: 200, close: 100 },
 });
 ```
 
-## Updating
+The same holds for what the hooks return. `floating.placement`,
+`floating.floatingStyles` and `floating.context.open` are live reads, so using
+them inside JSX keeps the markup up to date without any extra wiring.
 
-`useFloating()` only calculates the position **once** on render, or when the reference/floating elements changed — for example, the floating element gets mounted via conditional rendering.
+### Documentation
 
-If the floating element lives in a different `offsetParent` context to the reference element, it will need to be updated while mounted to remain “anchored”. This includes scrolling and resizing the window or the elements themselves.
+Run `pnpm dev` for the [playground](examples/playground), an app
+with a demo of every hook and component.
 
-To do so, use the `autoUpdate` utility:
+The [`docs/`](docs/) directory covers the whole surface:
 
-```js
-import { useFloating } from 'solid-floating-ui';
-import { autoUpdate } from '@floating-ui/dom';
- 
-function App() {
-  const [reference, setReference] = createSignal();
-  const [floating, setFloating] = createSignal();
+- [Getting started](docs/getting-started.md)
+- [Reactivity](docs/reactivity.md)
+- [Positioning](docs/positioning.md)
+- [Interactions](docs/interactions.md)
+- [Components](docs/components.md)
+- [Transitions](docs/transitions.md)
+- [Utilities](docs/utilities.md)
+- [Recipes](docs/recipes.md)
+- [Migrating from `@floating-ui/react`](docs/migrating-from-react.md)
 
-  useFloating(reference, floating, {
-    whileElementsMounted: autoUpdate,
- 
-    // Or, pass options. Ensure the cleanup function is returned.
-    whileElementsMounted: (reference, floating, update) => (
-      autoUpdate(reference, floating, update, {
-        animationFrame: true,
-      })
-    )
-  });
-}
+### Claude Code plugin
+
+[`plugins/solid-floating-ui`](plugins/solid-floating-ui) is a Claude Code
+plugin for building these patterns:
+
+```
+/plugin marketplace add lxsmnsyc/solid-floating-ui
+/plugin install solid-floating-ui@solid-floating-ui
 ```
 
-Alternatively (or additionally), you may want to update manually in some cases. The primitive returns an `update()` function to update the position at will:
+It adds one skill, `solid-floating-ui`, which loads on its own whenever the work
+involves anchored or overlay UI in a SolidJS project. The skill carries the
+reactivity rules that decide whether the result updates at all, plus a complete
+working recipe for each pattern: tooltip, popover, dialog, select, nested menus,
+context menu, cursor tracking, composite, transitions, delay groups and the
+arrow.
+
+Two commands come with it:
+
+- `/floating-ui-recipe <name>` scaffolds one of those patterns into the current
+  project, matching the conventions already in the codebase.
+- `/floating-ui-audit [path]` reviews existing usage for the mistakes that
+  type-check and render but silently stop updating.
+
+### What is included
+
+Positioning:
+
+- `useFloating`, `usePosition`, `useFloatingRootContext`
+- The middleware re-exported from `@floating-ui/dom`, plus an `arrow` that
+  accepts an accessor
+
+Interactions, composed through `useInteractions`:
+
+- `useClick`, `useClientPoint`, `useDismiss`, `useFocus`, `useHover`,
+  `useListNavigation`, `useRole`, `useTypeahead`
+- `safePolygon` for `useHover`
+
+Components:
+
+- `FloatingArrow`, `FloatingFocusManager`, `FloatingList` with `useListItem`,
+  `FloatingOverlay`, `FloatingPortal`, `FloatingTree` with `FloatingNode`
+- `FloatingDelayGroup` and the experimental `NextFloatingDelayGroup`
+- `Composite` and `CompositeItem`
+
+Utilities:
+
+- `useId`, `useMergeRefs`, `useTransitionStatus`, `useTransitionStyles`
+- `solid-floating-ui/utils` for the DOM helpers Floating UI exposes
+
+### Differences from `@floating-ui/react`
+
+- Options and returned values are reactive getters rather than values captured
+  on render, so there is no dependency array anywhere.
+- There are no ref containers. Anything the library reads from you is an
+  accessor, such as `items` or the `arrow` element, and anything it produces
+  arrives through a callback, such as `FloatingList`'s `onElementsChange`.
+- `Composite` and `CompositeItem` take a `render` callback only, because
+  SolidJS has no `cloneElement`.
+- Prop getters produce SolidJS event names, so `onFocusIn` and `onFocusOut`
+  stand in for React's bubbling `onFocus` and `onBlur`.
+
+### Updating the position
+
+`useFloating` recomputes the position when the elements or the positioning
+options change. Pass `autoUpdate` as `whileElementsMounted` to keep the
+floating element anchored while scrolling and resizing:
 
 ```js
-
-const position = useFloating();
-
-position.update();
+useFloating({
+  whileElementsMounted: (reference, floating, update) =>
+    autoUpdate(reference, floating, update, { animationFrame: true }),
+});
 ```
 
-### Virtual Elements
-
-See [Virtual Elements](https://floating-ui.com/docs/virtual-elements) for details.
+You can also recompute at will:
 
 ```js
-function App() {
-  const [floating, setFloating] = createSignal();
+const floating = useFloating();
 
-  const position = useFloating(
-    () => ({
-      getBoundingClientRect() {
-        return {
-          // ...
-        };
-      },
-    }),
-    floating,
-  );
+floating.update();
+```
 
-  return (
-    <div
-      ref={floating}
-      style={{
-        position: position.strategy,
-        top: `${position.y ?? 0}px`,
-        left: `${position.x ?? 0}px`,
-      }}
-    >
-      Tooltip
-    </div>
-  );
-}
+### Virtual elements
+
+See [Virtual Elements](https://floating-ui.com/docs/virtual-elements) for
+details. Pass one through `refs.setPositionReference`:
+
+```js
+const floating = useFloating();
+
+floating.refs.setPositionReference({
+  getBoundingClientRect() {
+    return {/* ... */};
+  },
+});
 ```
 
 ## Sponsors

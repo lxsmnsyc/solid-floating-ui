@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>solid-floating-ui E2E</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 80px;
+        font-family: system-ui, sans-serif;
+      }
+      .floating {
+        background: #222;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        width: max-content;
+      }
+      .menu {
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 4px;
+        width: max-content;
+      }
+      .menu [role='option'] {
+        display: block;
+        padding: 4px 8px;
+      }
+      .menu [role='option']:focus {
+        background: #cde;
+        outline: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/main.tsx"></script>
+  </body>
+</html>
