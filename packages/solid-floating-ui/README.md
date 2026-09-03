@@ -115,6 +115,16 @@ The [`docs/` directory](https://github.com/lxsmnsyc/solid-floating-ui/tree/main/
 - [Recipes](https://github.com/lxsmnsyc/solid-floating-ui/blob/main/docs/recipes.md)
 - [Migrating from `@floating-ui/react`](https://github.com/lxsmnsyc/solid-floating-ui/blob/main/docs/migrating-from-react.md)
 
+### Claude Code plugin
+
+A plugin with a working recipe for every pattern lives in
+[`plugins/solid-floating-ui`](https://github.com/lxsmnsyc/solid-floating-ui/tree/main/plugins/solid-floating-ui):
+
+```
+/plugin marketplace add lxsmnsyc/solid-floating-ui
+/plugin install solid-floating-ui@solid-floating-ui
+```
+
 ### What is included
 
 Positioning:

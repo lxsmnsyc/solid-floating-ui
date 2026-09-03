@@ -115,6 +115,16 @@ The [`docs/`](docs/) directory covers the whole surface:
 - [Recipes](docs/recipes.md)
 - [Migrating from `@floating-ui/react`](docs/migrating-from-react.md)
 
+### Claude Code plugin
+
+A plugin with a working recipe for every pattern lives in
+[`plugins/solid-floating-ui`](plugins/solid-floating-ui):
+
+```
+/plugin marketplace add lxsmnsyc/solid-floating-ui
+/plugin install solid-floating-ui@solid-floating-ui
+```
+
 ### What is included
 
 Positioning:

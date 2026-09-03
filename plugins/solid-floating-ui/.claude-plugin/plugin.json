@@ -1,0 +1,12 @@
+{
+  "name": "solid-floating-ui",
+  "description": "Recipes for building floating elements in SolidJS: tooltips, popovers, dialogs, selects, nested menus, context menus, cursor tracking, composites, transitions and delay groups, built on solid-floating-ui.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Alexis Munsayac",
+    "url": "https://github.com/lxsmnsyc"
+  },
+  "homepage": "https://github.com/lxsmnsyc/solid-floating-ui",
+  "license": "MIT",
+  "keywords": ["solid-js", "floating-ui", "tooltip", "popover", "dropdown", "positioning"]
+}
