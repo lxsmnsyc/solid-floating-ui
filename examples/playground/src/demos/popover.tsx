@@ -11,12 +11,23 @@ import {
   useInteractions,
   useRole,
 } from 'solid-floating-ui';
-import { Show, createSignal } from 'solid-js';
+import { Show, createSignal, onCleanup } from 'solid-js';
 
 export default function PopoverDemo() {
   const [open, setOpen] = createSignal(false);
   const [modal, setModal] = createSignal(false);
   const [name, setName] = createSignal('');
+  const [focused, setFocused] = createSignal('nothing');
+
+  function onFocusIn(event: FocusEvent) {
+    const target = event.target;
+    setFocused(target instanceof HTMLElement ? (target.dataset.name ?? 'nothing') : 'nothing');
+  }
+
+  document.addEventListener('focusin', onFocusIn);
+  onCleanup(() => {
+    document.removeEventListener('focusin', onFocusIn);
+  });
 
   const floating = useFloating({
     get open() {
@@ -39,12 +50,13 @@ export default function PopoverDemo() {
   return (
     <>
       <div class="stage">
-        <button type="button" class="trigger">
-          Before
+        <button type="button" class="trigger" data-name="tab stop before">
+          Tab stop before
         </button>
         <button
           type="button"
           class="trigger"
+          data-name="trigger"
           {...interactions.getReferenceProps()}
           ref={(element) => {
             floating.refs.setReference(element);
@@ -52,10 +64,6 @@ export default function PopoverDemo() {
         >
           Rename
         </button>
-        <button type="button" class="trigger">
-          After
-        </button>
-
         <Show when={open()}>
           <FloatingPortal>
             <FloatingFocusManager context={floating.context} modal={modal()}>
@@ -72,6 +80,7 @@ export default function PopoverDemo() {
                 <input
                   value={name()}
                   placeholder="Untitled"
+                  data-name="name field"
                   onInput={(event) => {
                     setName(event.currentTarget.value);
                   }}
@@ -79,6 +88,7 @@ export default function PopoverDemo() {
                 <button
                   type="button"
                   class="trigger"
+                  data-name="done button"
                   onClick={() => {
                     setOpen(false);
                   }}
@@ -89,6 +99,10 @@ export default function PopoverDemo() {
             </FloatingFocusManager>
           </FloatingPortal>
         </Show>
+
+        <button type="button" class="trigger" data-name="tab stop after">
+          Tab stop after
+        </button>
       </div>
 
       <div class="controls">
@@ -104,9 +118,12 @@ export default function PopoverDemo() {
         </label>
       </div>
 
+      <p class="readout">focus: {focused()}</p>
       <p class="note">
-        With <code>modal</code> off, Tab leaves the popover and continues through the page. With it
-        on, focus is trapped and the rest of the page is hidden from screen readers.
+        The two plain buttons are there to be tabbed through. Open the popover and press Tab
+        repeatedly while watching the readout: with <code>modal</code> off, focus leaves the popover
+        and continues to the tab stop after it; with <code>modal</code> on, focus cycles inside the
+        popover and never reaches either one.
       </p>
     </>
   );
