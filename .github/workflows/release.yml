@@ -1,0 +1,52 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+
+# Only one release run at a time, so two merges cannot publish the same version.
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      # With pending changesets, this opens or updates a "Version Packages" pull
+      # request. Once that pull request is merged, it publishes to npm and
+      # creates the GitHub release.
+      - name: Version or publish
+        uses: changesets/action@v1
+        with:
+          version: pnpm run cs:ver
+          publish: pnpm run cs:pub
+          title: 'chore: version packages'
+          commit: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
