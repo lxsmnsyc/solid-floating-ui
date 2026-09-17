@@ -21,7 +21,7 @@
     "type-check": "pnpm recursive run type-check"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.7",
+    "@changesets/cli": "^3.0.3",
     "@lxsmnsyc/oxlint-config": "^0.1.2",
     "oxfmt": "^0.66.0",
     "oxlint": "^1.81.0",

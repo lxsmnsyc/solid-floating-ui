@@ -10,6 +10,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
+  # Lets npm authenticate through trusted publishing, with no token secret.
   id-token: write
 
 jobs:
@@ -23,9 +24,10 @@ jobs:
         with:
           version: 10
 
+      # Trusted publishing needs npm 11.5.1 or later, which ships with Node 24.
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
 
@@ -35,18 +37,14 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      # With pending changesets, this opens or updates a "Version Packages" pull
-      # request. Once that pull request is merged, it publishes to npm and
-      # creates the GitHub release.
+      # With pending changesets, this opens or updates a version pull request.
+      # Once that pull request is merged, it publishes to npm and creates the
+      # GitHub release.
       - name: Version or publish
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
-          version: pnpm run cs:ver
-          publish: pnpm run cs:pub
-          title: 'chore: version packages'
-          commit: 'chore: version packages'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version-script: pnpm run cs:ver
+          publish-script: pnpm run cs:pub
+          pr-title: 'chore: version packages'
+          commit-message: 'chore: version packages'
