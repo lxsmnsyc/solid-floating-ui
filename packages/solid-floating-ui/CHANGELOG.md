@@ -1,5 +1,11 @@
 # solid-floating-ui
 
+## 2.0.0-next.0
+
+### Major Changes
+
+- 7abb054: - The package now targets SolidJS 2. `solid-js` and `@solidjs/web` are peer dependencies, and the DOM parts are imported from `@solidjs/web`.
+
 ## 1.0.1
 
 ### Patch Changes
