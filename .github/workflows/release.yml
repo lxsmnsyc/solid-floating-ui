@@ -1,53 +1,66 @@
 name: Release
+
+# Every push to `main` or `2.0` either opens or updates a "Version Packages" pull
+# request from the pending changesets. Once that pull request is merged, the next
+# push publishes the versions that are not on npm yet. `main` publishes the stable
+# release. `2.0` is in changesets pre mode, so it publishes prereleases under the
+# `next` tag instead.
 on:
   push:
     branches:
-      # `main` publishes the stable release. `2.0` is in changesets pre mode,
-      # so it publishes prereleases under the `next` tag instead.
       - main
       - '2.0'
 
-# Only one release run at a time, so two merges cannot publish the same version.
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+# Two releases running at once could both try to publish the same version.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
-  contents: write
-  pull-requests: write
-  # Lets npm authenticate through trusted publishing, with no token secret.
-  id-token: write
+  contents: write # push release tags and create GitHub releases
+  pull-requests: write # open the Version Packages pull request
+  id-token: write # authenticate to npm through trusted publishing
 
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
+      # Third-party actions are pinned to a commit because this job publishes to npm.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          version: 10
+          # Fetch the full history and existing tags for the release tags that `changeset publish` creates.
+          fetch-depth: 0
 
-      # Trusted publishing needs npm 11.5.1 or later, which ships with Node 24.
-      - uses: actions/setup-node@v4
+      # The pnpm version comes from `packageManager` in the root package.json.
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+          # No `registry-url`. It writes an `.npmrc` that expects a token, and trusted publishing needs none.
 
-      - name: Install
-        run: pnpm install --frozen-lockfile
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install --global npm@^11.5.1
 
-      - name: Build
-        run: pnpm run build
+      - run: pnpm install --frozen-lockfile
 
-      # With pending changesets, this opens or updates a version pull request.
-      # Once that pull request is merged, it publishes to npm and creates the
-      # GitHub release.
-      - name: Version or publish
-        uses: changesets/action@v2
+      - run: pnpm fmt:check
+
+      - run: pnpm lint
+
+      - run: pnpm type-check
+
+      - run: pnpm build
+
+      # The tests run in a real browser through Playwright.
+      - run: pnpm --filter solid-floating-ui exec playwright install --with-deps chromium
+
+      - run: pnpm test
+
+      - uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          version-script: pnpm run cs:ver
-          publish-script: pnpm run cs:pub
-          pr-title: 'chore: version packages'
+          version-script: pnpm cs:ver
+          publish-script: pnpm cs:pub
           commit-message: 'chore: version packages'
+          pr-title: 'chore: version packages'
