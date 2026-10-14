@@ -31,6 +31,12 @@ not run `pnpm cs:ver` or `pnpm cs:pub` by hand.
   pull request that bumps the version and writes `CHANGELOG.md`.
 - Merging that pull request publishes to npm and creates the GitHub release.
 
+The `2.0` branch releases the same way, but it is in changesets pre mode, so it
+publishes prereleases such as `2.0.0-next.0` under the npm `next` tag. That mode
+lives in `.changeset/pre.json`, so do not delete it. Run `pnpm cs:pre:exit` when
+the branch is ready for a stable release, and take `2.0` out of the release
+workflow's branch list once it has merged.
+
 ## Changesets
 
 Every change ships with a changeset. Writing one is part of finishing the work,

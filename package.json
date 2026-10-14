@@ -10,6 +10,8 @@
   "scripts": {
     "build": "pnpm recursive run build",
     "cs:add": "changeset add",
+    "cs:pre:enter": "changeset pre enter",
+    "cs:pre:exit": "changeset pre exit",
     "cs:pub": "changeset publish",
     "cs:ver": "changeset version",
     "dev": "pnpm --filter @examples/playground dev",

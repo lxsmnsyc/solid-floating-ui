@@ -2,7 +2,10 @@ name: Release
 on:
   push:
     branches:
+      # `main` publishes the stable release. `2.0` is in changesets pre mode,
+      # so it publishes prereleases under the `next` tag instead.
       - main
+      - '2.0'
 
 # Only one release run at a time, so two merges cannot publish the same version.
 concurrency: ${{ github.workflow }}-${{ github.ref }}
