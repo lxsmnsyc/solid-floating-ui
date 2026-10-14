@@ -1,0 +1,50 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+
+# Only one release run at a time, so two merges cannot publish the same version.
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  # Lets npm authenticate through trusted publishing, with no token secret.
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      # Trusted publishing needs npm 11.5.1 or later, which ships with Node 24.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      # With pending changesets, this opens or updates a version pull request.
+      # Once that pull request is merged, it publishes to npm and creates the
+      # GitHub release.
+      - name: Version or publish
+        uses: changesets/action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          version-script: pnpm run cs:ver
+          publish-script: pnpm run cs:pub
+          pr-title: 'chore: version packages'
+          commit-message: 'chore: version packages'

@@ -52,7 +52,6 @@ export { useFocus } from './hooks/useFocus';
 export type { UseFocusProps } from './hooks/useFocus';
 export { getDelay, useHover } from './hooks/useHover';
 export type { HandleClose, HandleCloseContext, UseHoverProps } from './hooks/useHover';
-export { default as useId } from './hooks/useId';
 export { useInteractions } from './hooks/useInteractions';
 export type { ExtendedUserProps, UseInteractionsReturn } from './hooks/useInteractions';
 export { useListNavigation } from './hooks/useListNavigation';

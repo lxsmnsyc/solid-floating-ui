@@ -14,6 +14,11 @@ export type EffectCleanup = (() => void) | undefined;
  * interaction hook reads depends on the branch it takes.
  */
 export function createCleanupEffect(effect: () => EffectCleanup): void {
+  // Same scope tracking is deprecated, but the compute and effect split cannot
+  // express this: which values an interaction hook reads depends on the branch
+  // it takes, and several of these effects write signals, which a compute
+  // cannot do.
+  // oxlint-disable-next-line no-deprecated
   createTrackedEffect(effect);
 }
 
@@ -22,6 +27,8 @@ export function createCleanupEffect(effect: () => EffectCleanup): void {
  * above, for effects with no teardown.
  */
 export function createTrackingEffect(effect: () => void): void {
+  // Same reason as above.
+  // oxlint-disable-next-line no-deprecated
   createTrackedEffect(effect);
 }
 

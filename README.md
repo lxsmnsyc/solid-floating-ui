@@ -162,7 +162,7 @@ Components:
 
 Utilities:
 
-- `useId`, `useMergeRefs`, `useTransitionStatus`, `useTransitionStyles`
+- `useMergeRefs`, `useTransitionStatus`, `useTransitionStyles`
 - `solid-floating-ui/utils` for the DOM helpers Floating UI exposes
 
 ### Differences from `@floating-ui/react`

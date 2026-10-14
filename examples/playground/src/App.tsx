@@ -1,5 +1,5 @@
 import { For, Show, createSignal, onCleanup } from 'solid-js';
-import { Dynamic, type JSX } from '@solidjs/web';
+import { type JSX, dynamic } from '@solidjs/web';
 import { DEMOS, type DemoEntry } from './demos';
 
 function currentId(): string {
@@ -40,7 +40,10 @@ export default function App(): JSX.Element {
           <p>{demo().description}</p>
         </header>
         <Show when={demo()} keyed>
-          {(entry) => <Dynamic component={entry.component} />}
+          {(entry) => {
+            const Demo = dynamic(() => entry.component);
+            return <Demo />;
+          }}
         </Show>
       </main>
     </div>

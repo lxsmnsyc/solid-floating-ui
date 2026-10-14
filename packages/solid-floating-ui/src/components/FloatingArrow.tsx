@@ -1,8 +1,7 @@
 import type { JSX } from '@solidjs/web';
 import type { Alignment, Placement, Side } from '@floating-ui/dom';
 import { getComputedStyle } from '@floating-ui/utils/dom';
-import { Show, createSignal, createTrackedEffect, omit } from 'solid-js';
-import useId from '../hooks/useId';
+import { Show, createEffect, createSignal, createUniqueId, omit } from 'solid-js';
 import type { FloatingContext } from '../types';
 
 /**
@@ -82,19 +81,21 @@ export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
   const tipRadius = (): number => local.tipRadius ?? 0;
   const strokeWidth = (): number => local.strokeWidth ?? 0;
 
-  const clipPathId = useId();
+  const clipPathId = createUniqueId();
   const [isRTL, setIsRTL] = createSignal(false);
 
   // https://github.com/floating-ui/floating-ui/issues/2932
-  createTrackedEffect(() => {
-    const floating = local.context.elements.floating;
-    if (!floating) {
-      return;
-    }
-    if (getComputedStyle(floating).direction === 'rtl') {
-      setIsRTL(true);
-    }
-  });
+  createEffect(
+    () => local.context.elements.floating,
+    (floating) => {
+      if (!floating) {
+        return;
+      }
+      if (getComputedStyle(floating).direction === 'rtl') {
+        setIsRTL(true);
+      }
+    },
+  );
 
   const side = (): Side => splitPlacement(local.context.placement).side;
   const alignment = (): Alignment | undefined => splitPlacement(local.context.placement).alignment;

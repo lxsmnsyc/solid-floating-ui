@@ -4,11 +4,11 @@ import {
   Show,
   createContext,
   createSignal,
+  createUniqueId,
   onCleanup,
   useContext,
 } from 'solid-js';
 import { type JSX, Portal } from '@solidjs/web';
-import useId from '../hooks/useId';
 import type { OpenChangeReason } from '../types';
 import { createAttribute } from '../utils/constants';
 import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
@@ -120,7 +120,7 @@ export interface UseFloatingPortalNodeProps {
 export function useFloatingPortalNode(
   props: UseFloatingPortalNodeProps = {},
 ): Accessor<HTMLElement | null> {
-  const uniqueId = useId();
+  const uniqueId = createUniqueId();
   const portalContext = usePortalContext();
 
   const [portalNode, setPortalNode] = createSignal<HTMLElement | null>(null);

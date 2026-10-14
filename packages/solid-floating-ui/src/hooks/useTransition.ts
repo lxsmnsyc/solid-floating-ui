@@ -1,7 +1,8 @@
 import type { JSX } from '@solidjs/web';
 import type { Placement, Side } from '@floating-ui/dom';
-import { type Accessor, createSignal, createTrackedEffect, untrack } from 'solid-js';
+import { type Accessor, createSignal, untrack } from 'solid-js';
 import type { FloatingContext, ReferenceType } from '../types';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 
 type Duration = number | { open?: number | undefined; close?: number | undefined };
 
@@ -37,7 +38,7 @@ function createDelayUnmount(
 ): Accessor<boolean> {
   const [isMounted, setIsMounted] = createSignal(untrack(open));
 
-  createTrackedEffect(() => {
+  createCleanupEffect(() => {
     if (open()) {
       setIsMounted(true);
       return undefined;
@@ -91,13 +92,13 @@ export function useTransitionStatus(
   const [status, setStatus] = createSignal<TransitionStatus>('unmounted');
   const isMounted = createDelayUnmount(() => context.open, closeDuration);
 
-  createTrackedEffect(() => {
+  createTrackingEffect(() => {
     if (!isMounted() && untrack(status) === 'close') {
       setStatus('unmounted');
     }
   });
 
-  createTrackedEffect(() => {
+  createCleanupEffect(() => {
     if (!context.elements.floating) {
       return undefined;
     }
@@ -198,7 +199,7 @@ export function useTransitionStyles<RT extends ReferenceType = ReferenceType>(
     },
   });
 
-  createTrackedEffect(() => {
+  createTrackingEffect(() => {
     const args = fnArgs();
     const status = transition.status;
 

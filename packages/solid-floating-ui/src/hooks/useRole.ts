@@ -1,8 +1,8 @@
+import { createUniqueId } from 'solid-js';
 import { useFloatingParentNodeId } from '../components/FloatingTree';
 import type { AnyElementProps, ElementProps, FloatingRootContext } from '../types';
 import { getFloatingFocusElement } from '../utils/element';
 import { lazyProps } from '../utils/reactivity';
-import useId from './useId';
 import type { ExtendedUserProps } from './useInteractions';
 
 type AriaRole = 'tooltip' | 'dialog' | 'alertdialog' | 'menu' | 'listbox' | 'grid' | 'tree';
@@ -42,7 +42,7 @@ const componentRoleToAriaRoleMap = new Map<AriaRole | ComponentRole, AriaRole | 
 export function useRole(context: FloatingRootContext, props: UseRoleProps = {}): ElementProps {
   const role = (): AriaRole | ComponentRole => props.role ?? 'dialog';
 
-  const defaultReferenceId = useId();
+  const defaultReferenceId = createUniqueId();
   const referenceId = (): string => {
     const id = context.elements.domReference?.id;
     return id === undefined || id === '' ? defaultReferenceId : id;

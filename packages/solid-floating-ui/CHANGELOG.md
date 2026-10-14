@@ -1,5 +1,13 @@
 # solid-floating-ui
 
+## 1.0.1
+
+### Patch Changes
+
+- 63aa003: - `useId` is gone. It only called `createUniqueId`, so call that from `solid-js` instead.
+- ea1e9b4: - The README no longer explains reactive options by comparison with React.
+- f26b5d9: - The README no longer explains the API through React APIs that have no SolidJS equivalent.
+
 ## 1.0.0
 
 ### Major Changes

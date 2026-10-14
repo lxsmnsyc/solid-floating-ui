@@ -22,6 +22,15 @@ Formatting is `oxfmt` and linting is `oxlint` with
 Builds are `tsdown`. Do not reintroduce Biome, ESLint, Prettier, Lerna or
 pridepack.
 
+## Releasing
+
+Releases run from `.github/workflows/release.yml` on every push to `main`. Do
+not run `pnpm cs:ver` or `pnpm cs:pub` by hand.
+
+- While changesets are pending, the workflow opens a "chore: version packages"
+  pull request that bumps the version and writes `CHANGELOG.md`.
+- Merging that pull request publishes to npm and creates the GitHub release.
+
 ## Changesets
 
 Every change ships with a changeset. Writing one is part of finishing the work,
