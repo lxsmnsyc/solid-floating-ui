@@ -25,7 +25,8 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          # Pinned, because the lockfile and `allowBuilds` need pnpm 12.
+          version: 12.7.0
 
       # Trusted publishing needs npm 11.5.1 or later, which ships with Node 24.
       - uses: actions/setup-node@v4
