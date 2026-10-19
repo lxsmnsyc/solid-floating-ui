@@ -1,11 +1,6 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "examples/*",
-    "docs"
-  ],
   "type": "module",
   "scripts": {
     "build": "pnpm recursive run build",
