@@ -4,3 +4,4 @@ packages:
   - 'docs'
 onlyBuiltDependencies:
   - esbuild
+strictPeerDependencies: false
