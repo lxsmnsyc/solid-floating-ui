@@ -1,11 +1,6 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "examples/*",
-    "docs"
-  ],
   "type": "module",
   "scripts": {
     "build": "pnpm recursive run build",
@@ -30,5 +25,5 @@
     "oxlint-tsgolint": "^7.0.2001",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.34.4"
+  "packageManager": "pnpm@12.7.0"
 }
