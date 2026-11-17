@@ -1,5 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import { Composite, CompositeItem } from 'solid-floating-ui';
-import { For, type JSX } from 'solid-js';
+import { For } from 'solid-js';
 
 const ITEMS = ['One', 'Two', 'Three'];
 

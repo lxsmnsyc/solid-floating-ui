@@ -18,6 +18,10 @@ yarn add @floating-ui/dom solid-floating-ui
 pnpm add @floating-ui/dom solid-floating-ui
 ```
 
+Requirements: `solid-js` and `@solidjs/web` 2.0 or newer, and `@floating-ui/dom`. For
+Solid 1.x, use the previous major (1.x) of this package, maintained on the
+[`solid-1`](https://github.com/lxsmnsyc/solid-floating-ui/tree/solid-1) branch.
+
 ## Usage
 
 `useFloating` positions a floating element against a reference element and

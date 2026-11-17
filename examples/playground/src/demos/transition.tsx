@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   autoUpdate,
   flip,
@@ -10,7 +11,7 @@ import {
   useRole,
   useTransitionStyles,
 } from 'solid-floating-ui';
-import { type JSX, Show, createSignal } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 
 export default function TransitionDemo(): JSX.Element {
   const [open, setOpen] = createSignal(false);

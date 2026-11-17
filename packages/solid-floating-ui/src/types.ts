@@ -7,7 +7,7 @@ import type {
   Strategy,
   VirtualElement,
 } from '@floating-ui/dom';
-import type { JSX } from 'solid-js';
+import type { JSX } from '@solidjs/web';
 import type { ExtendedUserProps } from './hooks/useInteractions';
 
 export type ReferenceType = Element | VirtualElement;
@@ -20,7 +20,7 @@ export type Orientation = 'vertical' | 'horizontal' | 'both';
  * The props an interaction hook contributes to an element. Values are read
  * lazily by `useInteractions`, so getters stay reactive when spread onto JSX.
  */
-export type AnyElementProps = Omit<JSX.HTMLAttributes<HTMLElement>, 'ref'> & {
+export type AnyElementProps = Omit<JSX.HTMLAttributes<HTMLElement>, 'ref' | `data-${string}`> & {
   ref?: ((element: HTMLElement) => void) | undefined;
 } & Record<string, unknown>;
 

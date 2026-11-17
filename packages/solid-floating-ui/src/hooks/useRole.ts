@@ -106,6 +106,15 @@ export function useRole(context: FloatingRootContext, props: UseRoleProps = {}):
     };
   }
 
+  // Solid's JSX types spell the ARIA pseudo booleans out as strings, and drop
+  // the attribute when the value is `undefined`.
+  function ariaBoolean(value: boolean | undefined): 'true' | 'false' | undefined {
+    if (value == null) {
+      return undefined;
+    }
+    return value ? 'true' : 'false';
+  }
+
   function item({ active, selected }: ExtendedUserProps): AnyElementProps {
     const commonProps: AnyElementProps = {
       role: 'option',
@@ -120,7 +129,7 @@ export function useRole(context: FloatingRootContext, props: UseRoleProps = {}):
       case 'combobox':
         return {
           ...commonProps,
-          'aria-selected': selected,
+          'aria-selected': ariaBoolean(selected),
         };
       case 'alertdialog':
       case 'dialog':

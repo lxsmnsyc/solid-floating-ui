@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingDelayGroup,
   FloatingPortal,
@@ -13,7 +14,7 @@ import {
   useRole,
   useTransitionStyles,
 } from 'solid-floating-ui';
-import { For, type JSX, Show, createSignal } from 'solid-js';
+import { For, Show, createSignal } from 'solid-js';
 
 const ACTIONS = ['Undo', 'Redo', 'Cut', 'Copy', 'Paste'];
 

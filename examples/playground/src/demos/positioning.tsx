@@ -1,5 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import { type Placement, autoUpdate, flip, offset, shift, useFloating } from 'solid-floating-ui';
-import { For, type JSX, createSignal } from 'solid-js';
+import { For, createSignal } from 'solid-js';
 
 const PLACEMENTS: Placement[] = [
   'top',

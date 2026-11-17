@@ -1,6 +1,7 @@
+import type { JSX } from '@solidjs/web';
 import type { Alignment, Placement, Side } from '@floating-ui/dom';
 import { getComputedStyle } from '@floating-ui/utils/dom';
-import { type JSX, Show, createEffect, createSignal, createUniqueId, splitProps } from 'solid-js';
+import { Show, createEffect, createSignal, createUniqueId, omit } from 'solid-js';
 import type { FloatingContext } from '../types';
 
 /**
@@ -61,7 +62,9 @@ export interface FloatingArrowProps extends JSX.SvgSVGAttributes<SVGSVGElement> 
  * Renders a pointing arrow triangle.
  */
 export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
-  const [local, rest] = splitProps(props, [
+  const local = props;
+  const rest = omit(
+    props,
     'context',
     'width',
     'height',
@@ -71,7 +74,7 @@ export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
     'stroke',
     'd',
     'style',
-  ]);
+  );
 
   const width = (): number => local.width ?? 14;
   const height = (): number => local.height ?? 7;
@@ -82,15 +85,17 @@ export function FloatingArrow(props: FloatingArrowProps): JSX.Element {
   const [isRTL, setIsRTL] = createSignal(false);
 
   // https://github.com/floating-ui/floating-ui/issues/2932
-  createEffect(() => {
-    const floating = local.context.elements.floating;
-    if (!floating) {
-      return;
-    }
-    if (getComputedStyle(floating).direction === 'rtl') {
-      setIsRTL(true);
-    }
-  });
+  createEffect(
+    () => local.context.elements.floating,
+    (floating) => {
+      if (!floating) {
+        return;
+      }
+      if (getComputedStyle(floating).direction === 'rtl') {
+        setIsRTL(true);
+      }
+    },
+  );
 
   const side = (): Side => splitPlacement(local.context.placement).side;
   const alignment = (): Alignment | undefined => splitPlacement(local.context.placement).alignment;

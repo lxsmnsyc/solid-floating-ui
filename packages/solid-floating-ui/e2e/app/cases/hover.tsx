@@ -1,5 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import { useFloating, useHover, useInteractions } from 'solid-floating-ui';
-import { type JSX, Show, createSignal } from 'solid-js';
+import { Show, createSignal } from 'solid-js';
 
 export default function HoverCase(): JSX.Element {
   const [open, setOpen] = createSignal(false);

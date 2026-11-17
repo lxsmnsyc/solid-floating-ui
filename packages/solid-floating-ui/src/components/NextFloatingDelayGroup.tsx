@@ -1,14 +1,8 @@
-import {
-  type JSX,
-  createContext,
-  createRenderEffect,
-  createSignal,
-  onCleanup,
-  useContext,
-} from 'solid-js';
+import type { JSX } from '@solidjs/web';
+import { createContext, createSignal, onCleanup, useContext } from 'solid-js';
 import { getDelay } from '../hooks/useHover';
 import type { Delay, FloatingRootContext } from '../types';
-import { createCleanupEffect } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 import { clearTimeoutIfSet } from '../utils/schedule';
 
 interface CurrentContext {
@@ -82,9 +76,7 @@ export function NextFloatingDelayGroup(props: NextFloatingDelayGroupProps): JSX.
   };
 
   return (
-    <NextFloatingDelayGroupContext.Provider value={context}>
-      {props.children}
-    </NextFloatingDelayGroupContext.Provider>
+    <NextFloatingDelayGroupContext value={context}>{props.children}</NextFloatingDelayGroupContext>
   );
 }
 
@@ -158,7 +150,7 @@ export function useNextDelayGroup(
     return undefined;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!enabled()) {
       return;
     }

@@ -1,7 +1,8 @@
-import { type JSX, createContext, createRenderEffect, createSignal, useContext } from 'solid-js';
+import type { JSX } from '@solidjs/web';
+import { createContext, createSignal, useContext } from 'solid-js';
 import { getDelay } from '../hooks/useHover';
 import type { Delay, FloatingRootContext } from '../types';
-import { createCleanupEffect } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 
 export interface GroupState {
   readonly delay: Delay;
@@ -76,7 +77,7 @@ export function FloatingDelayGroup(props: FloatingDelayGroupProps): JSX.Element 
     }
   }
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const id = currentId();
     if (id) {
       if (initialCurrentId === null) {
@@ -114,11 +115,7 @@ export function FloatingDelayGroup(props: FloatingDelayGroupProps): JSX.Element 
     setState,
   };
 
-  return (
-    <FloatingDelayGroupContext.Provider value={context}>
-      {props.children}
-    </FloatingDelayGroupContext.Provider>
-  );
+  return <FloatingDelayGroupContext value={context}>{props.children}</FloatingDelayGroupContext>;
 }
 
 export interface UseDelayGroupOptions {
@@ -143,7 +140,7 @@ export function useDelayGroup(
 
   const groupContext = useDelayGroupContext();
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -193,7 +190,7 @@ export function useDelayGroup(
     return undefined;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!enabled()) {
       return;
     }

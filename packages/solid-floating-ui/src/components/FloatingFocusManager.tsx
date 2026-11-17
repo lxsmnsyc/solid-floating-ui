@@ -1,5 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import { getNodeName, isHTMLElement } from '@floating-ui/utils/dom';
-import { type JSX, createRenderEffect, onCleanup, onMount } from 'solid-js';
+import { onCleanup } from 'solid-js';
 import { type FocusableElement, focusable, isTabbable, tabbable } from 'tabbable';
 import type { FloatingRootContext, OpenChangeEvent } from '../types';
 import { createAttribute } from '../utils/constants';
@@ -15,7 +16,7 @@ import { clearTimeoutIfSet, enqueueFocus } from '../utils/schedule';
 import { isVirtualClick, isVirtualPointerEvent, stopEvent } from '../utils/event';
 import { markOthers, supportsInert } from '../utils/markOthers';
 import { getNodeAncestors, getNodeChildren } from '../utils/nodes';
-import { createCleanupEffect } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect, onMount } from '../utils/reactivity';
 import {
   getNextTabbable,
   getPreviousTabbable,
@@ -511,7 +512,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
     };
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const focusElement = floatingFocusElement();
     if (disabled() || !isHTMLElement(focusElement)) {
       return;
@@ -700,7 +701,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
     };
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const focusElement = floatingFocusElement();
     if (disabled()) {
       return;

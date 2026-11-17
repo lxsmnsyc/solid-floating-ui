@@ -1,3 +1,4 @@
+import type { JSX } from '@solidjs/web';
 import {
   FloatingList,
   useClick,
@@ -9,7 +10,7 @@ import {
   useRole,
   useTypeahead,
 } from 'solid-floating-ui';
-import { For, type JSX, Show, createSignal } from 'solid-js';
+import { For, Show, createSignal } from 'solid-js';
 
 const ITEMS = ['Apple', 'Banana', 'Cherry', 'Damson'];
 

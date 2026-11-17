@@ -1,4 +1,4 @@
-import { createRenderEffect, onCleanup } from 'solid-js';
+import { onCleanup } from 'solid-js';
 import { useFloatingParentNodeId, useFloatingTree } from '../components/FloatingTree';
 import type { SafePolygonOptions } from '../safePolygon';
 import type {
@@ -13,7 +13,7 @@ import type {
 import { createAttribute } from '../utils/constants';
 import { contains, getDocument } from '../utils/element';
 import { isMouseLikePointerType } from '../utils/event';
-import { createCleanupEffect } from '../utils/reactivity';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 import { clearTimeoutIfSet } from '../utils/schedule';
 
 const safePolygonIdentifier = createAttribute('safe-polygon');
@@ -475,7 +475,7 @@ export function useHover(context: FloatingRootContext, props: UseHoverProps = {}
     return undefined;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     if (!context.open) {
       pointerType = undefined;
       restTimeoutPending = false;

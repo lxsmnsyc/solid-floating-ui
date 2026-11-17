@@ -1,5 +1,6 @@
+import type { JSX } from '@solidjs/web';
 import { autoUpdate, flip, offset, shift, useFloating } from 'solid-floating-ui';
-import { type JSX, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 
 export default function PositioningCase(): JSX.Element {
   const [placement, setPlacement] = createSignal<'bottom-start' | 'right'>('bottom-start');

@@ -31,6 +31,10 @@ not run `pnpm cs:ver` or `pnpm cs:pub` by hand.
   pull request that bumps the version and writes `CHANGELOG.md`.
 - Merging that pull request publishes to npm and creates the GitHub release.
 
+The Solid 1 line (1.x) lives on the `solid-1` branch. It has no release trigger.
+Publishing a 1.x patch from it needs a workflow and a dist-tag such as `solid-1`,
+so it does not take `latest`.
+
 ## Changesets
 
 Every change ships with a changeset. Writing one is part of finishing the work,

@@ -1,12 +1,6 @@
-import {
-  type JSX,
-  createContext,
-  createMemo,
-  createRenderEffect,
-  createSignal,
-  onCleanup,
-  useContext,
-} from 'solid-js';
+import { createTrackingEffect } from '../utils/reactivity';
+import type { JSX } from '@solidjs/web';
+import { createContext, createMemo, createSignal, onCleanup, useContext } from 'solid-js';
 
 function sortByDocumentPosition(a: Node, b: Node): number {
   const position = a.compareDocumentPosition(b);
@@ -97,11 +91,11 @@ export function FloatingList(props: FloatingListProps): JSX.Element {
     return result;
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     props.onElementsChange?.(sorted().map((node) => (node instanceof HTMLElement ? node : null)));
   });
 
-  createRenderEffect(() => {
+  createTrackingEffect(() => {
     const currentLabels = labels();
     props.onLabelsChange?.(sorted().map((node) => currentLabels.get(node) ?? null));
   });
@@ -115,9 +109,7 @@ export function FloatingList(props: FloatingListProps): JSX.Element {
     },
   };
 
-  return (
-    <FloatingListContext.Provider value={context}>{props.children}</FloatingListContext.Provider>
-  );
+  return <FloatingListContext value={context}>{props.children}</FloatingListContext>;
 }
 
 export interface UseListItemProps {
@@ -144,21 +136,33 @@ export function useListItem(props: UseListItemProps = {}): UseListItemReturn {
 
   const [element, setElement] = createSignal<HTMLElement | null>(null);
 
+  // Tracked outside the signal so the ref callback does not read reactive state.
+  let current: HTMLElement | null = null;
+
   function ref(node: HTMLElement | null): void {
-    if (node === element()) {
+    if (node === current) {
       return;
     }
+    if (current) {
+      listContext.unregister(current);
+    }
+    current = node;
     setElement(node);
 
     if (node) {
       listContext.register(node);
-      onCleanup(() => {
-        listContext.unregister(node);
-      });
     }
   }
 
-  createRenderEffect(() => {
+  // A ref callback cannot register cleanups, so the component scope does it.
+  onCleanup(() => {
+    if (current) {
+      listContext.unregister(current);
+      current = null;
+    }
+  });
+
+  createTrackingEffect(() => {
     const node = element();
     if (node) {
       listContext.setLabel(node, props.label === undefined ? node.textContent : props.label);

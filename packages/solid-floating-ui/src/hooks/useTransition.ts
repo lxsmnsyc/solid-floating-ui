@@ -1,6 +1,8 @@
+import type { JSX } from '@solidjs/web';
 import type { Placement, Side } from '@floating-ui/dom';
-import { type Accessor, type JSX, createEffect, createSignal, onCleanup, untrack } from 'solid-js';
+import { type Accessor, createSignal, untrack } from 'solid-js';
 import type { FloatingContext, ReferenceType } from '../types';
+import { createCleanupEffect, createTrackingEffect } from '../utils/reactivity';
 
 type Duration = number | { open?: number | undefined; close?: number | undefined };
 
@@ -36,20 +38,22 @@ function createDelayUnmount(
 ): Accessor<boolean> {
   const [isMounted, setIsMounted] = createSignal(untrack(open));
 
-  createEffect(() => {
+  createCleanupEffect(() => {
     if (open()) {
       setIsMounted(true);
-      return;
+      return undefined;
     }
 
     if (untrack(isMounted)) {
       const timeout = setTimeout(() => {
         setIsMounted(false);
       }, durationMs());
-      onCleanup(() => {
+      return () => {
         clearTimeout(timeout);
-      });
+      };
     }
+
+    return undefined;
   });
 
   return isMounted;
@@ -88,15 +92,15 @@ export function useTransitionStatus(
   const [status, setStatus] = createSignal<TransitionStatus>('unmounted');
   const isMounted = createDelayUnmount(() => context.open, closeDuration);
 
-  createEffect(() => {
+  createTrackingEffect(() => {
     if (!isMounted() && untrack(status) === 'close') {
       setStatus('unmounted');
     }
   });
 
-  createEffect(() => {
+  createCleanupEffect(() => {
     if (!context.elements.floating) {
-      return;
+      return undefined;
     }
 
     if (context.open) {
@@ -109,13 +113,13 @@ export function useTransitionStatus(
         setStatus('open');
       });
 
-      onCleanup(() => {
+      return () => {
         cancelAnimationFrame(frame);
-      });
-      return;
+      };
     }
 
     setStatus('close');
+    return undefined;
   });
 
   return {
@@ -195,7 +199,7 @@ export function useTransitionStyles<RT extends ReferenceType = ReferenceType>(
     },
   });
 
-  createEffect(() => {
+  createTrackingEffect(() => {
     const args = fnArgs();
     const status = transition.status;
 
