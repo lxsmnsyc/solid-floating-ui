@@ -31,11 +31,9 @@ not run `pnpm cs:ver` or `pnpm cs:pub` by hand.
   pull request that bumps the version and writes `CHANGELOG.md`.
 - Merging that pull request publishes to npm and creates the GitHub release.
 
-The `2.0` branch releases the same way, but it is in changesets pre mode, so it
-publishes prereleases such as `2.0.0-next.0` under the npm `next` tag. That mode
-lives in `.changeset/pre.json`, so do not delete it. Run `pnpm cs:pre:exit` when
-the branch is ready for a stable release, and take `2.0` out of the release
-workflow's branch list once it has merged.
+The Solid 1 line (1.x) lives on the `solid-1` branch. It has no release trigger.
+Publishing a 1.x patch from it needs a workflow and a dist-tag such as `solid-1`,
+so it does not take `latest`.
 
 ## Changesets
 

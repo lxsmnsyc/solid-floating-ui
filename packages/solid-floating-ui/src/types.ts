@@ -20,7 +20,7 @@ export type Orientation = 'vertical' | 'horizontal' | 'both';
  * The props an interaction hook contributes to an element. Values are read
  * lazily by `useInteractions`, so getters stay reactive when spread onto JSX.
  */
-export type AnyElementProps = Omit<JSX.HTMLAttributes<HTMLElement>, 'ref'> & {
+export type AnyElementProps = Omit<JSX.HTMLAttributes<HTMLElement>, 'ref' | `data-${string}`> & {
   ref?: ((element: HTMLElement) => void) | undefined;
 } & Record<string, unknown>;
 
